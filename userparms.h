@@ -45,7 +45,7 @@ extern "C" {
 // *****************************************************************************
 #include <stdint.h>
 #include <xc.h>
-#include "pim_select.h"
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: Constants
@@ -73,15 +73,16 @@ constant slope. The slope is determined by TUNING_DELAY_RAMPUP constant.
 
 /* open loop continuous functioning */
 /* closed loop transition disabled  */
-#undef OPEN_LOOP_FUNCTIONING
+#define OPEN_LOOP_FUNCTIONING
 
 /* Definition for torque mode - for a separate tuning of the current PI
 controllers, tuning mode will disable the speed PI controller */
 #undef TORQUE_MODE
-
 /* FOC with single shunt is enabled */
 /* undef to work with dual Shunt  */    
-#define SINGLE_SHUNT     
+#undef SINGLE_SHUNT     
+
+#undef INTERNAL_OPAMP_CONFIG    
 /*********************************** ADC Scaling ******************************/
 /* Scaling constants: Determined by calibration or hardware design. */
 
@@ -96,8 +97,8 @@ controllers, tuning mode will disable the speed PI controller */
 /********************  support xls file definitions begin *********************/
 /* The following values are given in the xls attached file */
     
-#ifdef MCLV2    
-/*Update the following motor tuning parameters while using MCLV2 build configuration*/
+    
+/*Update the following motor tuning parameters while using LVMC build configuration*/
     
 /* Motor's number of pole pairs */
 #define NOPOLESPAIRS 5
@@ -107,11 +108,11 @@ controllers, tuning mode will disable the speed PI controller */
 #define MAXIMUM_SPEED_RPM    3500 
 
 /* The following values are given in the xls attached file */
-#define NORM_CURRENT_CONST     0.000121
+#define NORM_CURRENT_CONST     0.000134
 /* normalized ls/dt value */
-#define NORM_LSDTBASE 1460
+#define NORM_LSDTBASE 1626
 /* normalized rs value */
-#define NORM_RS  12990
+#define NORM_RS  1809
 /* the calculation of Rs gives a value exceeding the Q15 range so,
  the normalized value is further divided by 2 to fit the 32768 limit
  this is taken care in the estim.c where the value is implied
@@ -128,83 +129,10 @@ controllers, tuning mode will disable the speed PI controller */
 /* di = i(t1)-i(t2) limitation
  high speed limitation, for dt 50us 
  the value can be taken from attached xls file */
-#define D_ILIMIT_HS 1092
+#define D_ILIMIT_HS 956
 /* low speed limitation, for dt 8*50us */
 #define D_ILIMIT_LS 4369
 
-#endif
-
-#ifdef MCHV2_MCHV3    
-/*Update the following motor tuning parameters while using MCHV2 build configuration*/
-#ifdef INTERNAL_OPAMP_PIM
-/* Motor's number of pole pairs */
-#define NOPOLESPAIRS 5 
-/* Nominal speed of the motor in RPM */
-#define NOMINAL_SPEED_RPM    3000 
-/* Maximum speed of the motor in RPM - given by the motor's manufacturer */
-#define MAXIMUM_SPEED_RPM    5000 
-
-/* The following values are given in the xls attached file */
-#define NORM_CURRENT_CONST     0.000336
-/* normalized ls/dt value */
-#define NORM_LSDTBASE 545
-/* normalized rs value */
-#define NORM_RS 1921
-/* the calculation of Rs gives a value exceeding the Q15 range so,
- the normalized value is further divided by 2 to fit the 32768 limit
- this is taken care in the estim.c where the value is implied
- normalized inv kfi at base speed */
-#define NORM_INVKFIBASE  13474
-/* the calculation of InvKfi gives a value which not exceed the Q15 limit
-   to assure that an increase of the term with 5 is possible in the lookup table
-   for high flux weakening the normalized is initially divided by 2
-   this is taken care in the estim.c where the value is implied
-   normalized dt value */
-#define NORM_DELTAT  1790
-
-/* Limitation constants */
-/* di = i(t1)-i(t2) limitation
- high speed limitation, for dt 50us 
- the value can be taken from attached xls file */
-#define D_ILIMIT_HS 1365
-/* low speed limitation, for dt 8*50us */
-#define D_ILIMIT_LS 6554
-    
-#else    
-/* Motor's number of pole pairs */
-#define NOPOLESPAIRS 5
-/* Nominal speed of the motor in RPM */
-#define NOMINAL_SPEED_RPM    3000 
-/* Maximum speed of the motor in RPM - given by the motor's manufacturer */
-#define MAXIMUM_SPEED_RPM    5000 
-
-/* The following values are given in the xls attached file */
-#define NORM_CURRENT_CONST     0.000488
-/* normalized ls/dt value */
-#define NORM_LSDTBASE 793
-/* normalized rs value */
-#define NORM_RS  2794
-/* the calculation of Rs gives a value exceeding the Q15 range so,
- the normalized value is further divided by 2 to fit the 32768 limit
- this is taken care in the estim.c where the value is implied
- normalized inv kfi at base speed */
-#define NORM_INVKFIBASE  13474
-/* the calculation of InvKfi gives a value which not exceed the Q15 limit
-   to assure that an increase of the term with 5 is possible in the lookup table
-   for high flux weakening the normalized is initially divided by 2
-   this is taken care in the estim.c where the value is implied
-   normalized dt value */
-#define NORM_DELTAT  1790
-
-/* Limitation constants */
-/* di = i(t1)-i(t2) limitation
- high speed limitation, for dt 50us 
- the value can be taken from attached xls file */
-#define D_ILIMIT_HS 1365
-/* low speed limitation, for dt 8*50us */
-#define D_ILIMIT_LS 6554
-#endif
-#endif    
 /**********************  support xls file definitions end *********************/
 
 
@@ -260,9 +188,7 @@ minimum value accepted */
 /* The Speed Control Loop Executes every  SPEEDREFRAMP_COUNT */
 #define SPEEDREFRAMP_COUNT   3  
 
-/* PI controllers tuning values - */ 
-#ifdef MCLV2    
-    
+/* PI controllers tuning values - */     
 /* D Control Loop Coefficients */
 #define D_CURRCNTR_PTERM       Q15(0.02)
 #define D_CURRCNTR_ITERM       Q15(0.001)
@@ -281,29 +207,23 @@ minimum value accepted */
 #define SPEEDCNTR_CTERM        Q15(0.999)
 #define SPEEDCNTR_OUTMAX       0x5000
     
-#endif
-    
-#ifdef MCHV2_MCHV3    
-    
-/* D Control Loop Coefficients */
-#define D_CURRCNTR_PTERM       Q15(0.05)
-#define D_CURRCNTR_ITERM       Q15(0.003)
-#define D_CURRCNTR_CTERM       Q15(0.999)
-#define D_CURRCNTR_OUTMAX      0x7FFF
-
-/* Q Control Loop Coefficients */
-#define Q_CURRCNTR_PTERM       Q15(0.05)
-#define Q_CURRCNTR_ITERM       Q15(0.003)
-#define Q_CURRCNTR_CTERM       Q15(0.999)
-#define Q_CURRCNTR_OUTMAX      0x7FFF
-
-/* Velocity Control Loop Coefficients */
-#define SPEEDCNTR_PTERM        Q15(0.005)
-#define SPEEDCNTR_ITERM        Q15(0.0005)
-#define SPEEDCNTR_CTERM        Q15(0.999)
-#define SPEEDCNTR_OUTMAX       0x5000
-    
-#endif  
+///* D Control Loop Coefficients */
+//#define D_CURRCNTR_PTERM       Q15(0.05)
+//#define D_CURRCNTR_ITERM       Q15(0.003)
+//#define D_CURRCNTR_CTERM       Q15(0.999)
+//#define D_CURRCNTR_OUTMAX      0x7FFF
+//
+///* Q Control Loop Coefficients */
+//#define Q_CURRCNTR_PTERM       Q15(0.05)
+//#define Q_CURRCNTR_ITERM       Q15(0.003)
+//#define Q_CURRCNTR_CTERM       Q15(0.999)
+//#define Q_CURRCNTR_OUTMAX      0x7FFF
+//
+///* Velocity Control Loop Coefficients */
+//#define SPEEDCNTR_PTERM        Q15(0.05)
+//#define SPEEDCNTR_ITERM        Q15(0.001)
+//#define SPEEDCNTR_CTERM        Q15(0.999)
+//#define SPEEDCNTR_OUTMAX       0x5000
 /******************************** Field Weakening *****************************/
 /* Field Weakening constant for constant torque range 
    Flux reference value */

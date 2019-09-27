@@ -164,7 +164,7 @@ void Estim(void)
 
     bemfAlphaBeta.alpha =  valphabeta.alpha -
                         (int16_t) (__builtin_mulss(motorParm.qRs, 
-                                  ialphabeta.alpha) >> 14) -
+                                  ialphabeta.alpha) >> 11) -
                         estimator.qVIndalpha;
 
     /* The multiplication between the Rs and Ialpha was shifted by 14 instead
@@ -175,7 +175,7 @@ void Estim(void)
        BEMF = Ubeta - Rs Ibeta - Ls dIbeta/dt */
     bemfAlphaBeta.beta =   valphabeta.beta -
                         (int16_t) (__builtin_mulss(motorParm.qRs,
-                                 ialphabeta.beta) >> 14) -
+                                 ialphabeta.beta) >> 11) -
                         estimator.qVIndbeta;
 
     /* The multiplication between the Rs and Ibeta was shifted by 14 instead of 15
@@ -236,7 +236,7 @@ void Estim(void)
        assuring that extended range of the variable is possible in the
        lookup table the initial value of InvKfi is defined in userparms.h */
     estimator.qOmegaMr = estimator.qOmegaMr << 1;
-
+    
     /* the integral of the angle is the estimated angle */
     estimator.qRhoStateVar += __builtin_mulss(estimator.qOmegaMr,
                                 estimator.qDeltaT);

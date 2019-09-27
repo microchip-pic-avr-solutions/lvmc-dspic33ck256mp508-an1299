@@ -148,6 +148,7 @@ READ_ADC_PARM_T readADCParm;
 
 volatile int16_t thetaElectrical = 0,thetaElectricalOpenLoop = 0;
 uint16_t pwmPeriod;
+uint16_t adcDataBuffer12=0,adcDataBuffer15=0;
 
 MC_ALPHABETA_T valphabeta,ialphabeta;
 MC_SINCOS_T sincosTheta;
@@ -253,7 +254,7 @@ int main ( void )
                 }
 
             }
-#ifdef MCLV2    // Monitoring for Button 2 press in MCLV2
+            // Monitoring for Button 2 press in LVMC
             if(IsPressed_Button2())
             {
                 if((uGF.bits.RunMotor == 1) && (uGF.bits.OpenLoop == 0))
@@ -261,7 +262,7 @@ int main ( void )
                     uGF.bits.ChangeSpeed = !uGF.bits.ChangeSpeed;
                 }
             }
-#endif
+
             /* LED1 is used as motor run Status */
             LED1 = uGF.bits.RunMotor;
         }
@@ -326,7 +327,7 @@ void ResetParmeters(void)
         /* Initialize Single Shunt Related parameters */
         SingleShunt_InitializeParameters(&singleShuntParam);
         INVERTERA_PWM_TRIGA = ADC_SAMPLING_POINT;
-        PG3PHASE = MIN_DUTY;
+        PG4PHASE = MIN_DUTY;
         PG2PHASE = MIN_DUTY;
         PG1PHASE = MIN_DUTY;
     #else
@@ -420,33 +421,28 @@ void DoControl( void )
         /* if change speed indication, double the speed */
         if(uGF.bits.ChangeSpeed)
         {
-            /* if Bidirectional functioning, disable speed doubling */
-
-                /* read not signed ADC */
-                ReadADC0(ADCBUF_SPEED_REF_A,&readADCParm);
-
+            /* read not signed ADC */
+            ReadADC0(ADCBUF_SPEED_REF_A,&readADCParm);
+            
+            /* Potentiometer value is scaled between NOMINALSPEED_ELECTR and 
+             * MAXIMUMSPEED_ELECTR to set the speed reference*/
             readADCParm.qAnRef = (__builtin_muluu(readADCParm.qADValue,
                     MAXIMUMSPEED_ELECTR-NOMINALSPEED_ELECTR)>>15)+
                     NOMINALSPEED_ELECTR;  
-            if(readADCParm.qAnRef < ENDSPEED_ELECTR)
-                {
-               readADCParm.qAnRef =  ENDSPEED_ELECTR;
-                }
+
         }
         else
         {
-                /* unsigned values */
-                ReadADC0(ADCBUF_SPEED_REF_A,&readADCParm);
+            /* unsigned values */
+            ReadADC0(ADCBUF_SPEED_REF_A,&readADCParm);
 
-            /* ADC values are shifted with 2 */
-            /* Speed pot ref max value +-8190 */
+            /* Potentiometer value is scaled between ENDSPEED_ELECTR 
+             * and NOMINALSPEED_ELECTR to set the speed reference*/
+            
             readADCParm.qAnRef = (__builtin_muluu(readADCParm.qADValue,
                     NOMINALSPEED_ELECTR-ENDSPEED_ELECTR)>>15) +
                     ENDSPEED_ELECTR;  
-            if(readADCParm.qAnRef < ENDSPEED_ELECTR)
-            {
-               readADCParm.qAnRef =  ENDSPEED_ELECTR;
-            }
+            
         }
         if(ctrlParm.speedRampCount < SPEEDREFRAMP_COUNT)
         {
@@ -552,14 +548,14 @@ void DoControl( void )
                                        &piOutputIq.out);
         vdq.q = piOutputIq.out;
     }
-
+      
 }
 // *****************************************************************************
 /* Function:
-   _ADCAN19Interrupt()
+   _ADCInterrupt()
 
   Summary:
-   _ADCAN19Interrupt() ISR routine
+   _ADCInterrupt() ISR routine
 
   Description:
     Does speed calculation and executes the vector update loop
@@ -582,6 +578,9 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCAN19Interrupt()
 {
     /* Read ADC Buffet to Clear Flag */
 	adcDataBuffer = ClearADCIF_ReadADCBUF();
+    adcDataBuffer12 = ADCBUF12;
+    adcDataBuffer15 = ADCBUF15;
+
     #ifdef SINGLE_SHUNT
     /* If SINGLE_SHUNT is Enabled then single shunt three phase reconstruction
        algorithm is executed in this ISR */   

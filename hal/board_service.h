@@ -82,9 +82,7 @@ extern void BoardServiceInit(void);
 extern void BoardServiceStepIsr(void);
 extern void BoardService(void);
 extern bool IsPressed_Button1(void);
-#ifdef MCLV2
 extern bool IsPressed_Button2(void);
-#endif
 extern void InitPeripherals(void);
 
 #ifdef __cplusplus

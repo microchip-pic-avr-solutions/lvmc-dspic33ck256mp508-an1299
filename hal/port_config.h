@@ -10,8 +10,8 @@
     pins
 
   Description:
-    Definitions in the file are for dsPIC33CK256MP508 MC PIM plugged onto
-    Motor Control Development board from Microchip
+    Definitions in the file are for dsPIC33CK256MP508 on Motor Control 
+    Development board from Microchip
 
 *******************************************************************************/
 /*******************************************************************************
@@ -64,31 +64,23 @@
 // *****************************************************************************
 // Digital I/O definitions
 // Push button Switches
-#ifdef MCLV2
-// S2 : PIM #83 (RD5)
-#define S2                   PORTDbits.RD5
-// S3 : PIM #84 (RE7)
-#define S3                   PORTEbits.RE7
+    
+// SW1 :  (RE11)
+#define SW1                   PORTEbits.RE11
+// SW2 :  (RE12)
+#define SW2                   PORTEbits.RE12
         
 // S2 : PIM #83 - Used as START/STOP button of Motor
-#define BUTTON_START_STOP        S2
+#define BUTTON_START_STOP        SW1
 // S3 : PIM #84 - Used as Speed HALF/DOUBLE button of Motor
-#define BUTTON_SPEED_HALF_DOUBLE      S3
-#endif
+#define BUTTON_SPEED_HALF_DOUBLE      SW2
 
-#ifdef MCHV2_MCHV3
-// PUSH BUTTON: PIM #68
-#define PUSHBUTTON PORTEbits.RE5   
-        
-// PUSH BUTTON : PIM #83 - Used as START/STOP button of Motor
-#define BUTTON_START_STOP        PUSHBUTTON 
-#endif
 
 // Debug LEDs
-// LED2(D2) : PIM #01(RE9)
-#define LED2                    LATEbits.LATE9
-// LED1(D17 on MCLV-2 / D19 on MCHV-2) : PIM #60(RE8)
-#define LED1                    LATEbits.LATE8
+// LED2(LD11) : (RE7)
+#define LED2                    LATEbits.LATE7
+// LED1(LD10) : (RE6)
+#define LED1                    LATEbits.LATE6
 
 
 // *****************************************************************************

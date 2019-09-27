@@ -8,8 +8,8 @@
     This header file lists ADC Configuration related functions and definitions
 
   Description:
-    Definitions in the file are for dsPIC33CK256MP508 MC PIM plugged onto
-    Motor Control Development board from Microchip
+    Definitions in the file are for dsPIC33CK256MP508 on Motor Control 
+    Development board from Microchip
 
 *******************************************************************************/
 /*******************************************************************************
@@ -59,31 +59,28 @@
 // *****************************************************************************
 #include <xc.h>
 #include <stdint.h>
-#include "pim_select.h"        
 // *****************************************************************************
 // *****************************************************************************
 // Section: Constants
 // *****************************************************************************
 // *****************************************************************************
 // ADC MODULE Related Definitions
-#define ADCBUF_SPEED_REF_A      ADCBUF19
-#define ADCBUF_INV_A_IPHASE1    ADCBUF1
-#define ADCBUF_INV_A_IPHASE2    ADCBUF4
-
-#ifdef INTERNAL_OPAMP_PIM
- #define ADCBUF_INV_A_IBUS       ADCBUF0
-#else
- #define ADCBUF_INV_A_IBUS       ADCBUF17
-#endif        
+#define ADCBUF_SPEED_REF_A      ADCBUF11
+#define ADCBUF_INV_A_IPHASE1    ADCBUF0
+#define ADCBUF_INV_A_IPHASE2    ADCBUF1
+#define ADCBUF_INV_A_IBUS       ADCBUF4
+        
 
 /* This defines number of current offset samples for averaging 
  * If the 2^n samples are considered specify n(in this case 2^7(= 128)=> 7*/
 #define  CURRENT_OFFSET_SAMPLE_SCALER         7
         
-#define EnableADCInterrupt()   _ADCAN19IE = 1
-#define DisableADCInterrupt()  _ADCAN19IE = 0
-#define ClearADCIF()           _ADCAN19IF = 0
-#define ClearADCIF_ReadADCBUF() ADCBUF19
+#define EnableADCInterrupt()   _ADCAN15IE = 1
+#define DisableADCInterrupt()  _ADCAN15IE = 0
+#define ClearADCIF()           _ADCAN15IF = 0
+#define ClearADCIF_ReadADCBUF() ADCBUF15
+        
+#define _ADCInterrupt _ADCAN15Interrupt        
         
 // *****************************************************************************
 // *****************************************************************************

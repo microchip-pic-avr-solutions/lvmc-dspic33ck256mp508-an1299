@@ -40,9 +40,8 @@
 #include "pwm.h"
 
 BUTTON_T buttonStartStop;
-#ifdef MCLV2
-    BUTTON_T buttonSpeedHalfDouble;
-#endif
+BUTTON_T buttonSpeedHalfDouble;
+
 uint16_t boardServiceISRCounter = 0;
 
 void DisablePWMOutputsInverterA(void);
@@ -51,9 +50,7 @@ void BoardServiceInit(void);
 void BoardServiceStepIsr(void);
 void BoardService(void);
 bool IsPressed_Button1(void);
-#ifdef MCLV2
 bool IsPressed_Button2(void);
-#endif
 
 static void ButtonGroupInitialize(void);
 static void ButtonScan(BUTTON_T * ,bool);
@@ -70,7 +67,7 @@ bool IsPressed_Button1(void)
         return false;
     }
 }
-#ifdef MCLV2
+
 bool IsPressed_Button2(void)
 {
     if(buttonSpeedHalfDouble.status)
@@ -83,7 +80,7 @@ bool IsPressed_Button2(void)
         return false;
     }
 }
-#endif
+
 void BoardServiceStepIsr(void)
 {
     if (boardServiceISRCounter <  BOARD_SERVICE_TICK_COUNT)
@@ -97,11 +94,11 @@ void BoardService(void)
     {
         /* Button scanning loop for Button 1 to start Motor A */
         ButtonScan(&buttonStartStop,BUTTON_START_STOP);
-#ifdef MCLV2
+
         /* Button scanning loop for SW2 to enter into filed
             weakening mode */
         ButtonScan(&buttonSpeedHalfDouble,BUTTON_SPEED_HALF_DOUBLE);
-#endif
+
         boardServiceISRCounter = 0;
     }
 }
@@ -140,11 +137,11 @@ void ButtonGroupInitialize(void)
     buttonStartStop.state = BUTTON_NOT_PRESSED;
     buttonStartStop.debounceCount = 0;
     buttonStartStop.state = false;
-#ifdef MCLV2
+
     buttonSpeedHalfDouble.state = BUTTON_NOT_PRESSED;
     buttonSpeedHalfDouble.debounceCount = 0;
     buttonSpeedHalfDouble.state = false;
-#endif
+
 }
 // *****************************************************************************
 /* Function:
@@ -187,17 +184,17 @@ void InitPeripherals(void)
 void DisablePWMOutputsInverterA(void)
 {
     /** Set Override Data on all PWM outputs */
-    // 0b00 = State for PWM3H,L, if Override is Enabled
-    PG3IOCONLbits.OVRDAT = 0;
+    // 0b00 = State for PWM4H,L, if Override is Enabled
+    PG4IOCONLbits.OVRDAT = 0;
     // 0b00 = State for PWM2H,L, if Override is Enabled
     PG2IOCONLbits.OVRDAT = 0; 
     // 0b00 = State for PWM1H,L, if Override is Enabled
     PG1IOCONLbits.OVRDAT = 0;  
     
-    // 1 = OVRDAT<1> provides data for output on PWM3H
-    PG3IOCONLbits.OVRENH = 1; 
-    // 1 = OVRDAT<0> provides data for output on PWM3L
-    PG3IOCONLbits.OVRENL = 1; 
+    // 1 = OVRDAT<1> provides data for output on PWM4H
+    PG4IOCONLbits.OVRENH = 1; 
+    // 1 = OVRDAT<0> provides data for output on PWM4L
+    PG4IOCONLbits.OVRENL = 1; 
     
     // 1 = OVRDAT<1> provides data for output on PWM2H
     PG2IOCONLbits.OVRENH = 1;
@@ -219,10 +216,10 @@ void DisablePWMOutputsInverterA(void)
  */
 void EnablePWMOutputsInverterA(void)
 {    
-    // 0 = PWM Generator provides data for the PWM3H pin
-    PG3IOCONLbits.OVRENH = 0; 
-    // 0 = PWM Generator provides data for the PWM3L pin
-    PG3IOCONLbits.OVRENL = 0; 
+    // 0 = PWM Generator provides data for the PWM4H pin
+    PG4IOCONLbits.OVRENH = 0; 
+    // 0 = PWM Generator provides data for the PWM4L pin
+    PG4IOCONLbits.OVRENL = 0; 
     
     // 0 = PWM Generator provides data for the PWM2H pin
     PG2IOCONLbits.OVRENH = 0;

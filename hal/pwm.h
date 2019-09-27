@@ -9,8 +9,8 @@
     Edge Placement 
 
   Description:
-    Definitions in the file are for dsPIC33CK256MP508 MC PIM plugged onto
-    Motor Control Development board from Microchip
+    Definitions in the file are for dsPIC33CK256MP508 on Motor Control 
+    Development board from Microchip
 
 *******************************************************************************/
 /*******************************************************************************
@@ -71,16 +71,16 @@
 // MC PWM MODULE Related Definitions
 #define INVERTERA_PWM_PDC1      PG1DC
 #define INVERTERA_PWM_PDC2      PG2DC
-#define INVERTERA_PWM_PDC3      PG3DC
+#define INVERTERA_PWM_PDC3      PG4DC
         
 #define INVERTERA_PWM_PHASE1    PG1PHASE 
 #define INVERTERA_PWM_PHASE2    PG2PHASE
-#define INVERTERA_PWM_PHASE3    PG3PHASE        
+#define INVERTERA_PWM_PHASE3    PG4PHASE  
         
 #define INVERTERA_PWM_TRIGA      PG1TRIGA 
 #define INVERTERA_PWM_TRIGB      PG1TRIGB   
-#define INVERTERA_PWM_TRIGC      PG1TRIGC       
-        
+#define INVERTERA_PWM_TRIGC      PG1TRIGC         
+
 /* Specify PWM Frequency in Hertz */
 #define PWMFREQUENCY_HZ         20000
 /* Specify dead time in micro seconds */
@@ -97,7 +97,7 @@
 #define BOOTSTRAP_CHARGING_COUNTS (uint16_t)((BOOTSTRAP_CHARGING_TIME_SECS/LOOPTIME_SEC )* 2)
         
 // Definition to enable or disable PWM Fault
-#define ENABLE_PWM_FAULT
+#undef ENABLE_PWM_FAULT
         
 #define DDEADTIME               (uint16_t)(DEADTIME_MICROSEC*FOSC_MHZ)
 // loop time in terms of PWM clock period
