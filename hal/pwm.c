@@ -151,6 +151,7 @@ void InitPWMGenerators(void)
     InitPWMGenerator4 (); 
     
     
+
     InitDutyPWM124Generators();
 
     IFS4bits.PWM1IF = 0;
@@ -161,7 +162,7 @@ void InitPWMGenerators(void)
     PG1CONLbits.ON = 1;      // Enable PWM module after initializing generators
 
     /* Function call to charge Bootstrap capacitors*/
-    ChargeBootstarpCapacitors();
+ //   ChargeBootstarpCapacitors();
 }
 // *****************************************************************************
 /* Function:
@@ -324,7 +325,6 @@ void ChargeBootstarpCapacitors(void)
             }
         }
     }
-
     // PDCx: PWMx GENERATOR DUTY CYCLE REGISTER
     // Initialize the PWM duty cycle for charging
     INVERTERA_PWM_PDC3 = 0;

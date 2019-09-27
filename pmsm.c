@@ -574,7 +574,7 @@ void DoControl( void )
   Remarks:
     None.
  */
-void __attribute__((__interrupt__,no_auto_psv)) _ADCAN19Interrupt()
+void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
 {
     /* Read ADC Buffet to Clear Flag */
 	adcDataBuffer = ClearADCIF_ReadADCBUF();
@@ -710,6 +710,10 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCAN19Interrupt()
     }
     else
     {
+//        pwmDutycycle.dutycycle3 = MIN_DUTY;
+//        pwmDutycycle.dutycycle2 = MIN_DUTY;
+//        pwmDutycycle.dutycycle1 = MIN_DUTY;
+//        PWMDutyCycleSet(&pwmDutycycle);
         INVERTERA_PWM_PDC3 = MIN_DUTY;
         INVERTERA_PWM_PDC2 = MIN_DUTY;
         INVERTERA_PWM_PDC1 = MIN_DUTY;
