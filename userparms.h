@@ -82,7 +82,7 @@ controllers, tuning mode will disable the speed PI controller */
 /* undef to work with dual Shunt  */    
 #define SINGLE_SHUNT     
 
-#undef INTERNAL_OPAMP_CONFIG    
+#define INTERNAL_OPAMP_CONFIG    
 /*********************************** ADC Scaling ******************************/
 /* Scaling constants: Determined by calibration or hardware design. */
 
@@ -108,11 +108,11 @@ controllers, tuning mode will disable the speed PI controller */
 #define MAXIMUM_SPEED_RPM    3500 
 
 /* The following values are given in the xls attached file */
-#define NORM_CURRENT_CONST     0.000134
+#define NORM_CURRENT_CONST     0.000671
 /* normalized ls/dt value */
-#define NORM_LSDTBASE 1626
+#define NORM_LSDTBASE 8129
 /* normalized rs value */
-#define NORM_RS  1809
+#define NORM_RS  9044
 /* the calculation of Rs gives a value exceeding the Q15 range so,
  the normalized value is further divided by 2 to fit the 32768 limit
  this is taken care in the estim.c where the value is implied
@@ -187,43 +187,25 @@ minimum value accepted */
 #define SPEEDREFRAMP   Q15(0.00003)  
 /* The Speed Control Loop Executes every  SPEEDREFRAMP_COUNT */
 #define SPEEDREFRAMP_COUNT   3  
-
+    
 /* PI controllers tuning values - */     
 /* D Control Loop Coefficients */
-#define D_CURRCNTR_PTERM       Q15(0.02)
-#define D_CURRCNTR_ITERM       Q15(0.001)
+#define D_CURRCNTR_PTERM       Q15(0.05)
+#define D_CURRCNTR_ITERM       Q15(0.003)
 #define D_CURRCNTR_CTERM       Q15(0.999)
 #define D_CURRCNTR_OUTMAX      0x7FFF
 
 /* Q Control Loop Coefficients */
-#define Q_CURRCNTR_PTERM       Q15(0.02)
-#define Q_CURRCNTR_ITERM       Q15(0.001)
+#define Q_CURRCNTR_PTERM       Q15(0.05)
+#define Q_CURRCNTR_ITERM       Q15(0.003)
 #define Q_CURRCNTR_CTERM       Q15(0.999)
 #define Q_CURRCNTR_OUTMAX      0x7FFF
 
 /* Velocity Control Loop Coefficients */
-#define SPEEDCNTR_PTERM        Q15(0.5)
-#define SPEEDCNTR_ITERM        Q15(0.005)
+#define SPEEDCNTR_PTERM        Q15(0.05)
+#define SPEEDCNTR_ITERM        Q15(0.001)
 #define SPEEDCNTR_CTERM        Q15(0.999)
 #define SPEEDCNTR_OUTMAX       0x5000
-    
-///* D Control Loop Coefficients */
-//#define D_CURRCNTR_PTERM       Q15(0.05)
-//#define D_CURRCNTR_ITERM       Q15(0.003)
-//#define D_CURRCNTR_CTERM       Q15(0.999)
-//#define D_CURRCNTR_OUTMAX      0x7FFF
-//
-///* Q Control Loop Coefficients */
-//#define Q_CURRCNTR_PTERM       Q15(0.05)
-//#define Q_CURRCNTR_ITERM       Q15(0.003)
-//#define Q_CURRCNTR_CTERM       Q15(0.999)
-//#define Q_CURRCNTR_OUTMAX      0x7FFF
-//
-///* Velocity Control Loop Coefficients */
-//#define SPEEDCNTR_PTERM        Q15(0.05)
-//#define SPEEDCNTR_ITERM        Q15(0.001)
-//#define SPEEDCNTR_CTERM        Q15(0.999)
-//#define SPEEDCNTR_OUTMAX       0x5000
 /******************************** Field Weakening *****************************/
 /* Field Weakening constant for constant torque range 
    Flux reference value */
