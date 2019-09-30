@@ -124,7 +124,7 @@ void InitializeADCs (void)
        for the shared ADC core sample time.
        Ranges from 2 to 1025 TADCORE
        if SHRSAMC = 15 ,then Sampling time is 17 TADCORE */
-    ADCON2Hbits.SHRSAMC = 15;
+    ADCON2Hbits.SHRSAMC = 8;
 
     ADCON3L  = 0;
     /* ADC Reference Voltage Selection bits 
@@ -292,7 +292,7 @@ void InitializeADCs (void)
        1 = Common and individual interrupts are enabled for analog channel
        0 = Common and individual interrupts are disabled for analog channel*/
     
-    _IE15        = 1 ;
+    _IE15        = 0 ;
     /* Clear ADC interrupt flag */
     _ADCAN15IF    = 0 ;  
     /* Set ADC interrupt priority IPL 7  */ 
@@ -300,7 +300,7 @@ void InitializeADCs (void)
     /* Disable the AN15 interrupt  */
     _ADCAN15IE    = 0 ; 
     
-    _IE11        = 0 ;
+    _IE11        = 1 ;
     /* Clear ADC interrupt flag */
     _ADCAN11IF    = 0 ;  
     /* Set ADC interrupt priority IPL 7  */ 

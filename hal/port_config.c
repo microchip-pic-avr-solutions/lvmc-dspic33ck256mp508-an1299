@@ -261,4 +261,8 @@ void MapGPIOHWFunction(void)
         UART_TX : PIN #14 - ANN2/RP77/RD13(Output)   */
     _U1RXR = 78;
     _RP77R = 0b000001;
+    
+    _RP66R = 0b100100;
+    TRISEbits.TRISE14 = 0;
+    TRISDbits.TRISD15  = 0;
 }

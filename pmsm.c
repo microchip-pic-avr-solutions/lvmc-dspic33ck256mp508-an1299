@@ -209,7 +209,7 @@ int main ( void )
 {
     InitOscillator();
     SetupGPIOPorts();
-
+    LATDbits.LATD12 = 0;
     /* Turn on LED2 to indicate the device is programmed */
     LED2 = 1;
     /* Initialize Peripherals */
@@ -251,6 +251,7 @@ int main ( void )
                 {
                     EnablePWMOutputsInverterA();
                     uGF.bits.RunMotor = 1;
+                    LATDbits.LATD15 = 1;
                 }
 
             }
@@ -264,7 +265,7 @@ int main ( void )
             }
 
             /* LED1 is used as motor run Status */
-            LED1 = uGF.bits.RunMotor;
+        //    LED1 = uGF.bits.RunMotor;
         }
 
     } // End of Main loop
@@ -316,6 +317,8 @@ void ResetParmeters(void)
     /* Change mode */
     uGF.bits.ChangeMode = 1;
     
+     LATDbits.LATD15 = 0;
+    
     /* Initialize PI control parameters */
     InitControlParameters();        
     /* Initialize estimator parameters */
@@ -327,6 +330,8 @@ void ResetParmeters(void)
         /* Initialize Single Shunt Related parameters */
         SingleShunt_InitializeParameters(&singleShuntParam);
         INVERTERA_PWM_TRIGA = ADC_SAMPLING_POINT;
+        INVERTERA_PWM_TRIGB = LOOPTIME_TCY>>1;
+        INVERTERA_PWM_TRIGC = LOOPTIME_TCY-1;
         PG4PHASE = MIN_DUTY;
         PG2PHASE = MIN_DUTY;
         PG1PHASE = MIN_DUTY;
@@ -581,11 +586,26 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
     adcDataBuffer12 = ADCBUF12;
     adcDataBuffer15 = ADCBUF15;
 
-    #ifdef SINGLE_SHUNT
+    #ifdef SINGLE_SHUNT 
+    if(IFS4bits.PWM1IF ==1)
+    {
+        singleShuntParam.adcSamplePoint = 0;
+        IFS4bits.PWM1IF = 0;
+        DiagnosticsStepIsr();
+        BoardServiceStepIsr();
+        if(LED2==0)
+        {
+          LED2 = 1;  
+        } 
+        else
+        {
+           LED2 = 0;
+        }  
+    }    
     /* If SINGLE_SHUNT is Enabled then single shunt three phase reconstruction
        algorithm is executed in this ISR */   
-    if(uGF.bits.RunMotor)
-    {
+//    if(uGF.bits.RunMotor)
+//    {
         /* If single shunt algorithm is enabled, three ADC interrupts will be
 		 serviced every PWM period in order to sample current twice and
 		 be able to reconstruct the three phases and to read the value of POT*/
@@ -605,6 +625,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
                 singleShuntParam.adcSamplePoint = 1;                             
             break;
             case SS_SAMPLE_BUS1:
+                LATEbits.LATE14 = 1;
                 /*Set Trigger to measure BusCurrent Second sample during PWM 
                   Timer is counting down*/
                 singleShuntParam.adcSamplePoint = 2;  
@@ -613,6 +634,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
                 
             break;
             case SS_SAMPLE_BUS2:
+                LATEbits.LATE14 = 0;
                 /*Set Trigger to measure POT Value when PWM 
                   Timer value is zero*/
                 INVERTERA_PWM_TRIGA = ADC_SAMPLING_POINT;
@@ -621,6 +643,17 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
                     save second current measured*/
                 /* Ibus is measured and offset removed from measurement*/
                 singleShuntParam.Ibus2 = (int16_t)(ADCBUF_INV_A_IBUS) - measBusCurrParm.offsetBus;
+                
+            break;
+            
+            default:
+            break;  
+        }
+        if(uGF.bits.RunMotor)
+        {
+            
+            if(singleShuntParam.adcSamplePoint == 0)
+            {
                 /* Reconstruct Phase currents from Bus Current*/                
                 SingleShunt_PhaseCurrentReconstruction(&singleShuntParam);
                 /* Calculate qIa,qIb */
@@ -654,20 +687,38 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
                 MC_TransformClarkeInverseSwappedInput_Assembly(&valphabeta,&vabc);
                 SingleShunt_CalculateSpaceVectorPhaseShifted(&vabc,pwmPeriod,&singleShuntParam);
                 PWMDutyCycleSetDualEdge(&singleShuntParam.pwmDutycycle1,&singleShuntParam.pwmDutycycle2);
-                DiagnosticsStepIsr();
-                BoardServiceStepIsr();
-            break;
-            
-            default:
-            break;  
+            }
         }
+        else
+        {
+            INVERTERA_PWM_TRIGA = ADC_SAMPLING_POINT;
+            INVERTERA_PWM_TRIGB = LOOPTIME_TCY>>1;
+            INVERTERA_PWM_TRIGC = LOOPTIME_TCY-1;
+            singleShuntParam.pwmDutycycle1.dutycycle3 = MIN_DUTY;
+            singleShuntParam.pwmDutycycle1.dutycycle2 = MIN_DUTY;
+            singleShuntParam.pwmDutycycle1.dutycycle1 = MIN_DUTY;
+            singleShuntParam.pwmDutycycle2.dutycycle3 = MIN_DUTY;
+            singleShuntParam.pwmDutycycle2.dutycycle2 = MIN_DUTY;
+            singleShuntParam.pwmDutycycle2.dutycycle1 = MIN_DUTY;
+            PWMDutyCycleSetDualEdge(&singleShuntParam.pwmDutycycle1,&singleShuntParam.pwmDutycycle2); 
+        }   
         
-    }
-    else
-    {
-        DiagnosticsStepIsr();
-        BoardServiceStepIsr();
-    }    
+//    }
+//    else
+//    {
+//        DiagnosticsStepIsr();
+//        BoardServiceStepIsr();
+//        INVERTERA_PWM_TRIGA = ADC_SAMPLING_POINT;
+//        INVERTERA_PWM_TRIGB = LOOPTIME_TCY>>1;
+//        INVERTERA_PWM_TRIGC = LOOPTIME_TCY-1;
+//        singleShuntParam.pwmDutycycle1.dutycycle3 = MIN_DUTY;
+//        singleShuntParam.pwmDutycycle1.dutycycle2 = MIN_DUTY;
+//        singleShuntParam.pwmDutycycle1.dutycycle1 = MIN_DUTY;
+//        singleShuntParam.pwmDutycycle2.dutycycle3 = MIN_DUTY;
+//        singleShuntParam.pwmDutycycle2.dutycycle2 = MIN_DUTY;
+//        singleShuntParam.pwmDutycycle2.dutycycle1 = MIN_DUTY;
+//        PWMDutyCycleSetDualEdge(&singleShuntParam.pwmDutycycle1,&singleShuntParam.pwmDutycycle2);
+//    }    
     
     #else  
     /* When single shunt is not enabled, that is when is running dual 
@@ -710,13 +761,13 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
     }
     else
     {
-//        pwmDutycycle.dutycycle3 = MIN_DUTY;
-//        pwmDutycycle.dutycycle2 = MIN_DUTY;
-//        pwmDutycycle.dutycycle1 = MIN_DUTY;
-//        PWMDutyCycleSet(&pwmDutycycle);
-        INVERTERA_PWM_PDC3 = MIN_DUTY;
-        INVERTERA_PWM_PDC2 = MIN_DUTY;
-        INVERTERA_PWM_PDC1 = MIN_DUTY;
+        pwmDutycycle.dutycycle3 = MIN_DUTY;
+        pwmDutycycle.dutycycle2 = MIN_DUTY;
+        pwmDutycycle.dutycycle1 = MIN_DUTY;
+        PWMDutyCycleSet(&pwmDutycycle);
+//        INVERTERA_PWM_PDC3 = MIN_DUTY;
+//        INVERTERA_PWM_PDC2 = MIN_DUTY;
+//        INVERTERA_PWM_PDC1 = MIN_DUTY;
         measCurrOffsetFlag = 1;
     }
     DiagnosticsStepIsr();

@@ -75,12 +75,12 @@
  * If the 2^n samples are considered specify n(in this case 2^7(= 128)=> 7*/
 #define  CURRENT_OFFSET_SAMPLE_SCALER         7
         
-#define EnableADCInterrupt()   _ADCAN15IE = 1
-#define DisableADCInterrupt()  _ADCAN15IE = 0
-#define ClearADCIF()           _ADCAN15IF = 0
-#define ClearADCIF_ReadADCBUF() ADCBUF15
+#define EnableADCInterrupt()   _ADCAN11IE = 1
+#define DisableADCInterrupt()  _ADCAN11IE = 0
+#define ClearADCIF()           _ADCAN11IF = 0
+#define ClearADCIF_ReadADCBUF() ADCBUF11
         
-#define _ADCInterrupt _ADCAN15Interrupt        
+#define _ADCInterrupt _ADCAN11Interrupt        
         
 // *****************************************************************************
 // *****************************************************************************

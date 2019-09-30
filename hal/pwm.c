@@ -134,7 +134,11 @@ void InitPWMGenerators(void)
     /* Initialize LOGIC CONTROL REGISTER 3 High */
     LOGCONF     = 0x0000;
     /* PWM EVENT OUTPUT CONTROL REGISTER A */
-    PWMEVTA     = 0x0000;    
+    PWMEVTA     = 0x0000; 
+    PWMEVTAbits.EVTAPGS = 0;
+    PWMEVTAbits.EVTASEL = 0x8;
+    PWMEVTAbits.EVTAOEN = 1;
+    
     /* PWM EVENT OUTPUT CONTROL REGISTER B */
     PWMEVTB     = 0x0000;
     /* PWM EVENT OUTPUT CONTROL REGISTER C */
