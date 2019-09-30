@@ -89,7 +89,9 @@ typedef struct
     int16_t Ib;				/* Reconstructed value for Ib */
     int16_t Ic;				/* Reconstructed value for Ic */
     int16_t Ibus1;
-    int16_t Ibus2;			
+    int16_t Ibus2;
+    int16_t Ibus1Buffer;
+    int16_t Ibus2Buffer;	
     int16_t trigger1;       /* This variable holds the first trigger value 
                                to be stored in TRIG1 register for 
                                A/D conversion. The converted value will be used 
@@ -105,9 +107,8 @@ typedef struct
 
 typedef enum tagSSADCSAMPLE_STATE
 { 
-    SS_SAMPLE_POT = 0,      /* POT Measumenet */
-    SS_SAMPLE_BUS1 = 1,     /* Bus Current Sample1 */
-    SS_SAMPLE_BUS2 = 2,     /* Bus Current Sample2 */   
+    SS_SAMPLE_BUS1 = 0,     /* Bus Current Sample1 */
+    SS_SAMPLE_BUS2 = 1,     /* Bus Current Sample2 */   
      
 }SSADCSAMPLE_STATE;
 

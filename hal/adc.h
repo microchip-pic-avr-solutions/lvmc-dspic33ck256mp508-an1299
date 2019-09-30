@@ -80,7 +80,14 @@
 #define ClearADCIF()           _ADCAN11IF = 0
 #define ClearADCIF_ReadADCBUF() ADCBUF11
         
-#define _ADCInterrupt _ADCAN11Interrupt        
+#define _ADCInterrupt _ADCAN11Interrupt    
+        
+#define EnableADCInterruptIBUS()   _ADCAN4IE = 1
+#define DisableADCInterruptIBUS()  _ADCAN4IE = 0
+#define ClearADCIFIBUS()           _ADCAN4IF = 0
+#define ClearADCIF_ReadADCBUFIBUS() ADCBUF4
+        
+#define _ADCInterruptIBUS _ADCAN4Interrupt 
         
 // *****************************************************************************
 // *****************************************************************************

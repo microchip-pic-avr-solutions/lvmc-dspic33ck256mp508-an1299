@@ -85,6 +85,11 @@ void SingleShunt_InitializeParameters(SINGLE_SHUNT_PARM_T *pSingleShunt)
     /*Trigger  values of Bus Current Samples made equal to zero */
     pSingleShunt->trigger1 = 0;
     pSingleShunt->trigger2 = 0;
+        /*Trigger  values of Bus Current Samples made equal to zero */
+    pSingleShunt->Ibus1 = 0;
+    pSingleShunt->Ibus2 = 0;
+    pSingleShunt->Ibus1Buffer = 0;
+    pSingleShunt->Ibus2Buffer = 0;
     pSingleShunt->adcSamplePoint = 0;
 }
 // *****************************************************************************

@@ -134,9 +134,9 @@
 #include "delay.h"
 #include "board_service.h"
 #include "diagnostics.h"
-#ifdef SINGLE_SHUNT
-    #include "singleshunt.h"
-#endif
+
+#include "singleshunt.h"
+
 
 volatile UGF_T uGF;
 
@@ -218,7 +218,7 @@ int main ( void )
     /* Initializing Current offsets in structure variable */
         measBusCurrParm.offsetBus = (int16_t)(ADCBUF_INV_A_IBUS);
     #else
-    MeasCurrOffset(&measCurrParm.Offseta,&measCurrParm.Offsetb);
+        MeasCurrOffset(&measCurrParm.Offseta,&measCurrParm.Offsetb);
     #endif
 
     DiagnosticsInit();
@@ -298,13 +298,24 @@ void ResetParmeters(void)
 {
     /* Make sure ADC does not generate interrupt while initializing parameters*/
 	DisableADCInterrupt();
-    
+    DisablePWMOutputsInverterA();
+#ifdef SINGLE_SHUNT
+    DisableADCInterruptIBUS();
+    /* Initialize Single Shunt Related parameters */
+    SingleShunt_InitializeParameters(&singleShuntParam);
+    INVERTERA_PWM_TRIGB = LOOPTIME_TCY>>1;
+    INVERTERA_PWM_TRIGC = LOOPTIME_TCY-1;
+    INVERTERA_PWM_PHASE3 = MIN_DUTY;
+    INVERTERA_PWM_PHASE2 = MIN_DUTY;
+    INVERTERA_PWM_PHASE1 = MIN_DUTY;
+#endif
+    INVERTERA_PWM_TRIGA = ADC_SAMPLING_POINT;
     /* Re initialize the duty cycle to minimum value */
     INVERTERA_PWM_PDC3 = MIN_DUTY;
     INVERTERA_PWM_PDC2 = MIN_DUTY;
     INVERTERA_PWM_PDC1 = MIN_DUTY;
     
-    DisablePWMOutputsInverterA();
+
     
     /* Stop the motor   */
     uGF.bits.RunMotor = 0;        
@@ -325,20 +336,12 @@ void ResetParmeters(void)
     InitEstimParm();
     /* Initialize flux weakening parameters */
     InitFWParams();
-    
-    #ifdef SINGLE_SHUNT
-        /* Initialize Single Shunt Related parameters */
-        SingleShunt_InitializeParameters(&singleShuntParam);
-        INVERTERA_PWM_TRIGA = ADC_SAMPLING_POINT;
-        INVERTERA_PWM_TRIGB = LOOPTIME_TCY>>1;
-        INVERTERA_PWM_TRIGC = LOOPTIME_TCY-1;
-        PG4PHASE = MIN_DUTY;
-        PG2PHASE = MIN_DUTY;
-        PG1PHASE = MIN_DUTY;
-    #else
-        INVERTERA_PWM_TRIGA = ADC_SAMPLING_POINT;
-    #endif
-
+#ifdef  SINGLE_SHUNT 
+    /* Enable ADC interrupt and begin main loop timing */
+    ClearADCIFIBUS();
+    adcDataBuffer = ClearADCIF_ReadADCBUFIBUS();
+    EnableADCInterruptIBUS();  
+#endif
     /* Enable ADC interrupt and begin main loop timing */
     ClearADCIF();
     adcDataBuffer = ClearADCIF_ReadADCBUF();
@@ -581,152 +584,24 @@ void DoControl( void )
  */
 void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
 {
-    /* Read ADC Buffet to Clear Flag */
-	adcDataBuffer = ClearADCIF_ReadADCBUF();
-    adcDataBuffer12 = ADCBUF12;
-    adcDataBuffer15 = ADCBUF15;
-
-    #ifdef SINGLE_SHUNT 
-    if(IFS4bits.PWM1IF ==1)
-    {
-        singleShuntParam.adcSamplePoint = 0;
-        IFS4bits.PWM1IF = 0;
-        DiagnosticsStepIsr();
-        BoardServiceStepIsr();
-        if(LED2==0)
-        {
-          LED2 = 1;  
-        } 
-        else
-        {
-           LED2 = 0;
-        }  
-    }    
-    /* If SINGLE_SHUNT is Enabled then single shunt three phase reconstruction
-       algorithm is executed in this ISR */   
-//    if(uGF.bits.RunMotor)
-//    {
-        /* If single shunt algorithm is enabled, three ADC interrupts will be
-		 serviced every PWM period in order to sample current twice and
-		 be able to reconstruct the three phases and to read the value of POT*/
-        
-        switch(singleShuntParam.adcSamplePoint)
-        {
-            /* This algorithm only reads one analog input when running in 
-                single shunt mode. During PWM Timer is counting down, sample
-                and hold zero is configured to read bus current. Once the 
-                algorithm is done measuring shunt current at two different 
-                times, then the input of this sample and hold is configured 
-                to read the POT when PWM Timer is counting up*/
-            case SS_SAMPLE_POT:
-                /*Set Trigger to measure BusCurrent first sample during PWM 
-                  Timer is counting down*/
-                 
-                singleShuntParam.adcSamplePoint = 1;                             
-            break;
-            case SS_SAMPLE_BUS1:
-                LATEbits.LATE14 = 1;
-                /*Set Trigger to measure BusCurrent Second sample during PWM 
-                  Timer is counting down*/
-                singleShuntParam.adcSamplePoint = 2;  
-                /* Ibus is measured and offset removed from measurement*/
-                singleShuntParam.Ibus1 = (int16_t)(ADCBUF_INV_A_IBUS) - measBusCurrParm.offsetBus;
-                
-            break;
-            case SS_SAMPLE_BUS2:
-                LATEbits.LATE14 = 0;
-                /*Set Trigger to measure POT Value when PWM 
-                  Timer value is zero*/
-                INVERTERA_PWM_TRIGA = ADC_SAMPLING_POINT;
-                singleShuntParam.adcSamplePoint = 0;
-                /* this interrupt corresponds to the second trigger and 
-                    save second current measured*/
-                /* Ibus is measured and offset removed from measurement*/
-                singleShuntParam.Ibus2 = (int16_t)(ADCBUF_INV_A_IBUS) - measBusCurrParm.offsetBus;
-                
-            break;
-            
-            default:
-            break;  
-        }
-        if(uGF.bits.RunMotor)
-        {
-            
-            if(singleShuntParam.adcSamplePoint == 0)
-            {
-                /* Reconstruct Phase currents from Bus Current*/                
-                SingleShunt_PhaseCurrentReconstruction(&singleShuntParam);
-                /* Calculate qIa,qIb */
-                MeasCompCurr(singleShuntParam.Ia, singleShuntParam.Ib,&measCurrParm);
-                iabc.a = measCurrParm.qIa;
-                iabc.b = measCurrParm.qIb;
-                /* Calculate qId,qIq from qSin,qCos,qIa,qIb */
-                MC_TransformClarke_Assembly(&iabc,&ialphabeta);
-                MC_TransformPark_Assembly(&ialphabeta,&sincosTheta,&idq);
-
-                /* Speed and field angle estimation */
-                Estim();
-                /* Calculate control values */
-                DoControl();
-                /* Calculate qAngle */
-                CalculateParkAngle();
-                /* if open loop */
-                if(uGF.bits.OpenLoop == 1)
-                {
-                    /* the angle is given by park parameter */
-                    thetaElectrical = thetaElectricalOpenLoop;
-                }
-                else
-                {
-                    /* if closed loop, angle generated by estimator */
-                    thetaElectrical = estimator.qRho;
-                }
-                MC_CalculateSineCosine_Assembly_Ram(thetaElectrical,&sincosTheta);
-                MC_TransformParkInverse_Assembly(&vdq,&sincosTheta,&valphabeta);
-
-                MC_TransformClarkeInverseSwappedInput_Assembly(&valphabeta,&vabc);
-                SingleShunt_CalculateSpaceVectorPhaseShifted(&vabc,pwmPeriod,&singleShuntParam);
-                PWMDutyCycleSetDualEdge(&singleShuntParam.pwmDutycycle1,&singleShuntParam.pwmDutycycle2);
-            }
-        }
-        else
-        {
-            INVERTERA_PWM_TRIGA = ADC_SAMPLING_POINT;
-            INVERTERA_PWM_TRIGB = LOOPTIME_TCY>>1;
-            INVERTERA_PWM_TRIGC = LOOPTIME_TCY-1;
-            singleShuntParam.pwmDutycycle1.dutycycle3 = MIN_DUTY;
-            singleShuntParam.pwmDutycycle1.dutycycle2 = MIN_DUTY;
-            singleShuntParam.pwmDutycycle1.dutycycle1 = MIN_DUTY;
-            singleShuntParam.pwmDutycycle2.dutycycle3 = MIN_DUTY;
-            singleShuntParam.pwmDutycycle2.dutycycle2 = MIN_DUTY;
-            singleShuntParam.pwmDutycycle2.dutycycle1 = MIN_DUTY;
-            PWMDutyCycleSetDualEdge(&singleShuntParam.pwmDutycycle1,&singleShuntParam.pwmDutycycle2); 
-        }   
-        
-//    }
-//    else
-//    {
-//        DiagnosticsStepIsr();
-//        BoardServiceStepIsr();
-//        INVERTERA_PWM_TRIGA = ADC_SAMPLING_POINT;
-//        INVERTERA_PWM_TRIGB = LOOPTIME_TCY>>1;
-//        INVERTERA_PWM_TRIGC = LOOPTIME_TCY-1;
-//        singleShuntParam.pwmDutycycle1.dutycycle3 = MIN_DUTY;
-//        singleShuntParam.pwmDutycycle1.dutycycle2 = MIN_DUTY;
-//        singleShuntParam.pwmDutycycle1.dutycycle1 = MIN_DUTY;
-//        singleShuntParam.pwmDutycycle2.dutycycle3 = MIN_DUTY;
-//        singleShuntParam.pwmDutycycle2.dutycycle2 = MIN_DUTY;
-//        singleShuntParam.pwmDutycycle2.dutycycle1 = MIN_DUTY;
-//        PWMDutyCycleSetDualEdge(&singleShuntParam.pwmDutycycle1,&singleShuntParam.pwmDutycycle2);
-//    }    
-    
-    #else  
     /* When single shunt is not enabled, that is when is running dual 
         shunt resistor algorithm, ADC interrupt is serviced only once*/
     if( uGF.bits.RunMotor )
     {
-        /* Calculate qIa,qIb */
-        MeasCompCurr(ADCBUF_INV_A_IPHASE1, ADCBUF_INV_A_IPHASE2,&measCurrParm);
+#ifdef  SINGLE_SHUNT
+        /* Reconstruct Phase currents from Bus Current*/                
+        SingleShunt_PhaseCurrentReconstruction(&singleShuntParam);
+        
+
+        /* If single shunt algorithm is enabled, three ADC interrupts will be
+		 serviced every PWM period in order to sample current twice and
+		 be able to reconstruct the three phases and to read the value of POT*/
+                       /* Calculate qIa,qIb */
+        MeasCompCurr(singleShuntParam.Ia, singleShuntParam.Ib,&measCurrParm); 
+#else
+    /* Calculate qIa,qIb */
+    MeasCompCurr(ADCBUF_INV_A_IPHASE1, ADCBUF_INV_A_IPHASE2,&measCurrParm);
+#endif
         iabc.a = measCurrParm.qIa;
         iabc.b = measCurrParm.qIb;
         /* Calculate qId,qIq from qSin,qCos,qIa,qIb */
@@ -754,27 +629,75 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
         MC_TransformParkInverse_Assembly(&vdq,&sincosTheta,&valphabeta);
 
         MC_TransformClarkeInverseSwappedInput_Assembly(&valphabeta,&vabc);
+#ifdef SINGLE_SHUNT
+        SingleShunt_CalculateSpaceVectorPhaseShifted(&vabc,pwmPeriod,&singleShuntParam);
+        PWMDutyCycleSetDualEdge(&singleShuntParam.pwmDutycycle1,&singleShuntParam.pwmDutycycle2);
+#else
         MC_CalculateSpaceVectorPhaseShifted_Assembly(&vabc,pwmPeriod,
                                                             &pwmDutycycle);
         PWMDutyCycleSet(&pwmDutycycle);
+#endif
         
     }
     else
     {
+        INVERTERA_PWM_TRIGA = ADC_SAMPLING_POINT;
+#ifdef SINGLE_SHUNT
+        INVERTERA_PWM_TRIGB = LOOPTIME_TCY>>1;
+        INVERTERA_PWM_TRIGC = LOOPTIME_TCY-1;
+        singleShuntParam.pwmDutycycle1.dutycycle3 = MIN_DUTY;
+        singleShuntParam.pwmDutycycle1.dutycycle2 = MIN_DUTY;
+        singleShuntParam.pwmDutycycle1.dutycycle1 = MIN_DUTY;
+        singleShuntParam.pwmDutycycle2.dutycycle3 = MIN_DUTY;
+        singleShuntParam.pwmDutycycle2.dutycycle2 = MIN_DUTY;
+        singleShuntParam.pwmDutycycle2.dutycycle1 = MIN_DUTY;
+        PWMDutyCycleSetDualEdge(&singleShuntParam.pwmDutycycle1,&singleShuntParam.pwmDutycycle2); 
+#else
         pwmDutycycle.dutycycle3 = MIN_DUTY;
         pwmDutycycle.dutycycle2 = MIN_DUTY;
         pwmDutycycle.dutycycle1 = MIN_DUTY;
         PWMDutyCycleSet(&pwmDutycycle);
-//        INVERTERA_PWM_PDC3 = MIN_DUTY;
-//        INVERTERA_PWM_PDC2 = MIN_DUTY;
-//        INVERTERA_PWM_PDC1 = MIN_DUTY;
+#endif
         measCurrOffsetFlag = 1;
     }
+    adcDataBuffer12 = ADCBUF12;
+    adcDataBuffer15 = ADCBUF15;
+    
     DiagnosticsStepIsr();
     BoardServiceStepIsr();
-    #endif
-    
+    /* Read ADC Buffet to Clear Flag */
+	adcDataBuffer = ClearADCIF_ReadADCBUF();    
     ClearADCIF();   
+}
+void __attribute__((__interrupt__,no_auto_psv)) _ADCInterruptIBUS()
+{
+    switch(singleShuntParam.adcSamplePoint)
+    {
+        case SS_SAMPLE_BUS1:
+            LATEbits.LATE14 = 1;
+            /*Set Trigger to measure BusCurrent Second sample during PWM 
+              Timer is counting down*/
+            singleShuntParam.adcSamplePoint = 1;  
+            /* Ibus is measured and offset removed from measurement*/
+            singleShuntParam.Ibus1Buffer = (int16_t)(ADCBUF_INV_A_IBUS) - measBusCurrParm.offsetBus;
+
+        break;
+        case SS_SAMPLE_BUS2:
+            LATEbits.LATE14 = 0;
+            singleShuntParam.adcSamplePoint = 0;
+            /* this interrupt corresponds to the second trigger and 
+                save second current measured*/
+            /* Ibus is measured and offset removed from measurement*/
+            singleShuntParam.Ibus2Buffer = (int16_t)(ADCBUF_INV_A_IBUS) - measBusCurrParm.offsetBus;
+            singleShuntParam.Ibus1 = singleShuntParam.Ibus1Buffer;
+            singleShuntParam.Ibus2 = singleShuntParam.Ibus2Buffer;
+        break;
+
+        default:
+        break;  
+    }
+    ClearADCIFIBUS();
+    
 }
 // *****************************************************************************
 /* Function:
