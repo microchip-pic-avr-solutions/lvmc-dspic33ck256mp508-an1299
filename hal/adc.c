@@ -125,7 +125,7 @@ void InitializeADCs (void)
        for the shared ADC core sample time.
        Ranges from 2 to 1025 TADCORE
        if SHRSAMC = 15 ,then Sampling time is 17 TADCORE */
-    ADCON2Hbits.SHRSAMC = 8;
+    ADCON2Hbits.SHRSAMC = 15;
 
     ADCON3L  = 0;
     /* ADC Reference Voltage Selection bits 
@@ -292,20 +292,20 @@ void InitializeADCs (void)
     /* Common Interrupt Enable bits
        1 = Common and individual interrupts are enabled for analog channel
        0 = Common and individual interrupts are disabled for analog channel*/
-    
+   
     _IE15        = 0 ;
     /* Clear ADC interrupt flag */
     _ADCAN15IF    = 0 ;  
     /* Set ADC interrupt priority IPL 7  */ 
-    _ADCAN15IP   = 6 ;  
+    _ADCAN15IP   = 7 ;  
     /* Disable the AN15 interrupt  */
     _ADCAN15IE    = 0 ; 
     
-    _IE11        = 1 ;
+    _IE11        = 0 ;
     /* Clear ADC interrupt flag */
     _ADCAN11IF    = 0 ;  
     /* Set ADC interrupt priority IPL 7  */ 
-    _ADCAN11IP   = 6 ;  
+    _ADCAN11IP   = 7 ;  
     /* Disable the AN11 interrupt  */
     _ADCAN11IE    = 0 ;  
     
@@ -313,30 +313,31 @@ void InitializeADCs (void)
     /* Clear ADC interrupt flag */
     _ADCAN0IF    = 0 ;  
     /* Set ADC interrupt priority IPL 7  */ 
-    _ADCAN0IP   = 6 ;  
+    _ADCAN0IP   = 7 ;  
     /* Disable the AN0 interrupt  */
     _ADCAN0IE    = 0 ;  
     
-    
-    _IE1        = 0 ;
-    /* Clear ADC interrupt flag */
-    _ADCAN1IF    = 0 ;  
-    /* Set ADC interrupt priority IPL 7  */ 
-    _ADCAN1IP   = 6 ;  
-    /* Disable the AN1 interrupt  */
-    _ADCAN1IE    = 0 ;  
- 
-#ifdef SINGLE_SHUNT
-    _IE4        = 1 ;
+#ifdef SINGLE_SHUNT    
+     _IE4        = 1 ;
     /* Clear ADC interrupt flag */
     _ADCAN4IF    = 0 ;  
     /* Set ADC interrupt priority IPL 7  */ 
     _ADCAN4IP   = 7 ;  
-    /* Disable the AN11 interrupt  */
-    _ADCAN4IE    = 0 ; 
-#endif 
+    /* Disable the AN4 interrupt  */
+    _ADCAN4IE    = 0 ;
+     
+#else         
+    _IE1        = 1 ;
+    /* Clear ADC interrupt flag */
+    _ADCAN1IF    = 0 ;  
+    /* Set ADC interrupt priority IPL 7  */ 
+    _ADCAN1IP   = 7 ;  
+    /* Disable the AN1 interrupt  */
+    _ADCAN1IE    = 0 ; 
+#endif
     
     /* Trigger Source Selection for Corresponding Analog Inputs bits 
+     *  00101 = PMW1 Trigger 2
         00100 = PMW1 Trigger 1
         00001 = Common software trigger
         00000 = No trigger is enabled  */
@@ -345,15 +346,22 @@ void InitializeADCs (void)
     ADTRIG0Lbits.TRGSRC0 = 0x4;
     /* Trigger Source for Analog Input #1  = 0b0100 */
     ADTRIG0Lbits.TRGSRC1 = 0x4;
+#ifdef SINGLE_SHUNT
+    /* Trigger Source for Analog Input #4  = 0b0101 */
+    ADTRIG1Lbits.TRGSRC4 = 0x5;
+    /* Trigger Source for Analog Input #11  = 0b0001 */
+    ADTRIG2Hbits.TRGSRC11 = 0x1;
+    /* Trigger Source for Analog Input #12  = 0b0001 */
+    ADTRIG3Lbits.TRGSRC12 = 0x1;
+    /* Trigger Source for Analog Input #15  = 0b0001 */
+    ADTRIG3Hbits.TRGSRC15 = 0x1;
+#else
     /* Trigger Source for Analog Input #11  = 0b0100 */
     ADTRIG2Hbits.TRGSRC11 = 0x4;
     /* Trigger Source for Analog Input #12  = 0b0100 */
-    ADTRIG3Lbits.TRGSRC12 = 0x0;
+    ADTRIG3Lbits.TRGSRC12 = 0x4;
     /* Trigger Source for Analog Input #15  = 0b0100 */
-    ADTRIG3Hbits.TRGSRC15 = 0x0;
-    
-#ifdef SINGLE_SHUNT    
-    /* Trigger Source for Analog Input #4  = 0b0101 */
-    ADTRIG1Lbits.TRGSRC4 = 0x5;
+    ADTRIG3Hbits.TRGSRC15 = 0x4;
 #endif
+
 }

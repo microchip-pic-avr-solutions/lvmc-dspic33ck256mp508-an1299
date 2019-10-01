@@ -134,11 +134,7 @@ void InitPWMGenerators(void)
     /* Initialize LOGIC CONTROL REGISTER 3 High */
     LOGCONF     = 0x0000;
     /* PWM EVENT OUTPUT CONTROL REGISTER A */
-    PWMEVTA     = 0x0000; 
-    PWMEVTAbits.EVTAPGS = 0;
-    PWMEVTAbits.EVTASEL = 0x9;
-    PWMEVTAbits.EVTAOEN = 1;
-    
+    PWMEVTA     = 0x0000;     
     /* PWM EVENT OUTPUT CONTROL REGISTER B */
     PWMEVTB     = 0x0000;
     /* PWM EVENT OUTPUT CONTROL REGISTER C */
@@ -154,8 +150,6 @@ void InitPWMGenerators(void)
     InitPWMGenerator2 ();
     InitPWMGenerator4 (); 
     
-    
-
     InitDutyPWM124Generators();
 
     IFS4bits.PWM1IF = 0;
@@ -374,6 +368,7 @@ void InitPWMGenerator1 (void)
        0b01 = Macro uses Master clock selected by the PCLKCON.MCLKSEL bits*/
     PG1CONLbits.CLKSEL = 1;
     /* PWM Mode Selection bits
+     * 110 = Dual Edge Center-Aligned PWM mode (interrupt/register update once per cycle)
        100 = Center-Aligned PWM mode(interrupt/register update once per cycle)*/
 #ifdef SINGLE_SHUNT
     PG1CONLbits.MODSEL = 6;
@@ -488,7 +483,7 @@ void InitPWMGenerator1 (void)
     PG1EVTL      = 0x0000;
     /* ADC Trigger 1 Post-scaler Selection bits
        00000 = 1:1 */
-    PG1EVTLbits.ADTR1PS = 0;  
+    PG1EVTLbits.ADTR1PS = 0;
     /* ADC Trigger 1 Source is PG1TRIGC Compare Event Enable bit
        0 = PG1TRIGC register compare event is disabled as trigger source for 
            ADC Trigger 1 */
@@ -496,7 +491,7 @@ void InitPWMGenerator1 (void)
     /* ADC Trigger 1 Source is PG1TRIGB Compare Event Enable bit
        0 = PG1TRIGB register compare event is disabled as trigger source for 
            ADC Trigger 1 */
-    PG1EVTLbits.ADTR1EN2 = 0; 
+    PG1EVTLbits.ADTR1EN2 = 0;    
     /* ADC Trigger 1 Source is PG1TRIGA Compare Event Enable bit
        1 = PG1TRIGA register compare event is enabled as trigger source for 
            ADC Trigger 1 */
@@ -527,9 +522,18 @@ void InitPWMGenerator1 (void)
        01 = Interrupts CPU at TRIGA compare event
        10 = Interrupts CPU at ADC Trigger 1 event
        11 = Time base interrupts are disabled */
-    PG1EVTHbits.IEVTSEL = 3;
-   
+    PG1EVTHbits.IEVTSEL = 0;
+#ifdef SINGLE_SHUNT
     /* ADC Trigger 2 Source is PG1TRIGC Compare Event Enable bit
+       0 = PG1TRIGC register compare event is enabled as 
+           trigger source for ADC Trigger 2 */
+    PG1EVTHbits.ADTR2EN3 = 1;
+    /* ADC Trigger 2 Source is PG1TRIGB Compare Event Enable bit
+       0 = PG1TRIGB register compare event is enabled as 
+           trigger source for ADC Trigger 2 */
+    PG1EVTHbits.ADTR2EN2 = 1;
+#else
+        /* ADC Trigger 2 Source is PG1TRIGC Compare Event Enable bit
        0 = PG1TRIGC register compare event is disabled as 
            trigger source for ADC Trigger 2 */
     PG1EVTHbits.ADTR2EN3 = 0;
@@ -537,15 +541,6 @@ void InitPWMGenerator1 (void)
        0 = PG1TRIGB register compare event is disabled as 
            trigger source for ADC Trigger 2 */
     PG1EVTHbits.ADTR2EN2 = 0;
-#ifdef SINGLE_SHUNT
-    /* ADC Trigger 2 Source is PG1TRIGC Compare Event Enable bit
-       1 = PG1TRIGC register compare event is enabled as 
-           trigger source for ADC Trigger 2 */
-    PG1EVTHbits.ADTR2EN3 = 1;
-    /* ADC Trigger 2 Source is PG1TRIGB Compare Event Enable bit
-       1 = PG1TRIGB register compare event is enabled as 
-           trigger source for ADC Trigger 2 */
-    PG1EVTHbits.ADTR2EN2 = 1;
 #endif
     /* ADC Trigger 2 Source is PG1TRIGA Compare Event Enable bit
        0 = PG1TRIGA register compare event is disabled as 
@@ -663,17 +658,11 @@ void InitPWMGenerator1 (void)
 
     /* Initialize PWM GENERATOR 1 TRIGGER A REGISTER */
     PG1TRIGA     = ADC_SAMPLING_POINT;
-#ifdef SINGLE_SHUNT
-        /* Initialize PWM GENERATOR 1 TRIGGER B REGISTER */
-    PG1TRIGB     = LOOPTIME_TCY >> 1;
-    /* Initialize PWM GENERATOR 1 TRIGGER C REGISTER */
-    PG1TRIGC     = LOOPTIME_TCY - 1;
-#else
     /* Initialize PWM GENERATOR 1 TRIGGER B REGISTER */
     PG1TRIGB     = 0x0000;
     /* Initialize PWM GENERATOR 1 TRIGGER C REGISTER */
     PG1TRIGC     = 0x0000;
-#endif    
+    
 }
     
 // *****************************************************************************
@@ -711,6 +700,7 @@ void InitPWMGenerator2 (void)
        0b01 = Macro uses Master clock selected by the PCLKCON.MCLKSEL bits*/
     PG2CONLbits.CLKSEL = 1;
     /* PWM Mode Selection bits
+     * 110 = Dual Edge Center-Aligned PWM mode (interrupt/register update once per cycle)
        100 = Center-Aligned PWM mode(interrupt/register update once per cycle)*/
 #ifdef SINGLE_SHUNT
     PG2CONLbits.MODSEL = 6;
@@ -1035,6 +1025,7 @@ void InitPWMGenerator4 (void)
        0b01 = Macro uses Master clock selected by the PCLKCON.MCLKSEL bits*/
     PG4CONLbits.CLKSEL = 1;
     /* PWM Mode Selection bits
+     * 110 = Dual Edge Center-Aligned PWM mode (interrupt/register update once per cycle)
        100 = Center-Aligned PWM mode(interrupt/register update once per cycle)*/
 #ifdef SINGLE_SHUNT
     PG4CONLbits.MODSEL = 6;

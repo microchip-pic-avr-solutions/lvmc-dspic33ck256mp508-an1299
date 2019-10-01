@@ -56,14 +56,6 @@ extern "C" {
  */
 typedef struct
 {
-    int16_t   qKbus;        
-	int16_t   offsetBus;	
-} MEAS_BUSCURR_PARM_T;
- /* Description:
-    This structure will host parameters related to measured currents
- */
-typedef struct
-{
     int16_t T1;
     int16_t T2;
     int16_t T7;
@@ -111,9 +103,6 @@ typedef enum tagSSADCSAMPLE_STATE
     SS_SAMPLE_BUS2 = 1,     /* Bus Current Sample2 */   
      
 }SSADCSAMPLE_STATE;
-
-/* Current measurement parameters */
-extern MEAS_BUSCURR_PARM_T measBusCurrParm;   
 			
 extern SINGLE_SHUNT_PARM_T singleShuntParam;
 uint16_t SingleShunt_CalculateSpaceVectorPhaseShifted(MC_ABC_T *pABC,

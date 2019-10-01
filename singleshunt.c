@@ -40,8 +40,6 @@
 #include "meascurr.h"
 
 SINGLE_SHUNT_PARM_T singleShuntParam;
-// Single shuntn three phase reconstruction algorithm variables
-MEAS_BUSCURR_PARM_T measBusCurrParm;
 inline static void SingleShunt_CalculateSwitchingTime(SINGLE_SHUNT_PARM_T *,uint16_t );
 
 // *****************************************************************************
@@ -73,15 +71,6 @@ void SingleShunt_InitializeParameters(SINGLE_SHUNT_PARM_T *pSingleShunt)
 	pSingleShunt->tcrit = SSTCRIT;
     /* Set delay due to dead time and slew rate etc.*/
 	pSingleShunt->tDelaySample = SS_SAMPLE_DELAY;	
-    /* Scaling constants: Determined by calibration or hardware design.*/
-    measBusCurrParm.qKbus = KCURRBUS;
-    /*offset values of Phase a and Phase b current made equal to zero*/
-    measCurrParm.Offseta = 0;
-    measCurrParm.Offsetb = 0;
-    /*Scaling values of Phase a and Phase b current made equal to Scaling Value 
-     *of bus Current*/
-    measCurrParm.qKa = measBusCurrParm.qKbus;
-    measCurrParm.qKb = measBusCurrParm.qKbus;
     /*Trigger  values of Bus Current Samples made equal to zero */
     pSingleShunt->trigger1 = 0;
     pSingleShunt->trigger2 = 0;

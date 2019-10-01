@@ -59,6 +59,7 @@
 // *****************************************************************************
 #include <xc.h>
 #include <stdint.h>
+#include "userparms.h"
 // *****************************************************************************
 // *****************************************************************************
 // Section: Constants
@@ -74,20 +75,21 @@
 /* This defines number of current offset samples for averaging 
  * If the 2^n samples are considered specify n(in this case 2^7(= 128)=> 7*/
 #define  CURRENT_OFFSET_SAMPLE_SCALER         7
+#ifdef SINGLE_SHUNT       
+#define EnableADCInterrupt()   _ADCAN4IE = 1
+#define DisableADCInterrupt()  _ADCAN4IE = 0
+#define ClearADCIF()           _ADCAN4IF = 0
+#define ClearADCIF_ReadADCBUF() ADCBUF4
         
-#define EnableADCInterrupt()   _ADCAN11IE = 1
-#define DisableADCInterrupt()  _ADCAN11IE = 0
-#define ClearADCIF()           _ADCAN11IF = 0
-#define ClearADCIF_ReadADCBUF() ADCBUF11
+#define _ADCInterrupt _ADCAN4Interrupt  
+#else
+ #define EnableADCInterrupt()   _ADCAN1IE = 1
+#define DisableADCInterrupt()  _ADCAN1IE = 0
+#define ClearADCIF()           _ADCAN1IF = 0
+#define ClearADCIF_ReadADCBUF() ADCBUF1
         
-#define _ADCInterrupt _ADCAN11Interrupt    
-        
-#define EnableADCInterruptIBUS()   _ADCAN4IE = 1
-#define DisableADCInterruptIBUS()  _ADCAN4IE = 0
-#define ClearADCIFIBUS()           _ADCAN4IF = 0
-#define ClearADCIF_ReadADCBUFIBUS() ADCBUF4
-        
-#define _ADCInterruptIBUS _ADCAN4Interrupt 
+#define _ADCInterrupt _ADCAN1Interrupt  
+#endif
         
 // *****************************************************************************
 // *****************************************************************************

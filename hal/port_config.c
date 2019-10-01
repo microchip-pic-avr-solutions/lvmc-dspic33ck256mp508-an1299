@@ -219,10 +219,10 @@ void MapGPIOHWFunction(void)
     
     /*TEMPERATURE*/
     ANSELCbits.ANSELC0 = 1;
-    TRISCbits.TRISC0 = 1;
-    /*Voltage Signals*/
+    TRISCbits.TRISC0 = 1;  //PIN15:AN12/ANN0/RP48/RC0
+    /*DC Bus Voltage Signals*/
     ANSELCbits.ANSELC3 = 1;
-    TRISCbits.TRISC3 = 1;
+    TRISCbits.TRISC3 = 1;   //PIN33: AN15/CMP2A/IBIAS2/RP51/PMD11/PMA11/RC3
 
     /* Digital SIGNALS */   
     // DIGITAL INPUT/OUTPUT PINS
@@ -262,7 +262,4 @@ void MapGPIOHWFunction(void)
     _U1RXR = 78;
     _RP77R = 0b000001;
     
-    _RP66R = 0b100100;
-    TRISEbits.TRISE14 = 0;
-    TRISDbits.TRISD15  = 0;
 }
