@@ -83,15 +83,6 @@ controllers, tuning mode will disable the speed PI controller */
 #define SINGLE_SHUNT     
 
 #define INTERNAL_OPAMP_CONFIG    
-/*********************************** ADC Scaling ******************************/
-/* Scaling constants: Determined by calibration or hardware design. */
-
-/* scaling factor for pot */
-#define KPOT        Q15(0.5)
-/* scaling factor for current phase A */
-#define KCURRA      Q15(0.5)
-/* scaling factor for current phase B */
-#define KCURRB      Q15(0.5) 
 
 /****************************** Motor Parameters ******************************/
 /********************  support xls file definitions begin *********************/
@@ -169,7 +160,7 @@ before the open loop speed ramp up */
 /* Open loop acceleration */
 #define OPENLOOP_RAMPSPEED_INCREASERATE 10
 /* Open loop q current setup - */
-#define Q_CURRENT_REF_OPENLOOP NORM_CURRENT(1.41)
+#define Q_CURRENT_REF_OPENLOOP NORM_CURRENT(1.0)
 
 /* Maximum motor speed converted into electrical speed */
 #define MAXIMUMSPEED_ELECTR MAXIMUM_SPEED_RPM*NOPOLESPAIRS

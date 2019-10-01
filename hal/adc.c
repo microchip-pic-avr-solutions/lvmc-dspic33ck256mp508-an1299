@@ -236,7 +236,7 @@ void InitializeADCs (void)
    
     /*ADMOD0H configures Output Data Sign for Analog inputs  AN8 to AN15 */
     ADMOD0H = 0;
-    ADMOD0Hbits.SIGN11 = 1;
+    ADMOD0Hbits.SIGN11 = 0;
     ADMOD0Hbits.SIGN12 = 0;    
     ADMOD0Hbits.SIGN15 = 0;
 

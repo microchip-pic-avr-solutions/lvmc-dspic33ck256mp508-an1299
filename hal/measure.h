@@ -1,8 +1,22 @@
+// <editor-fold defaultstate="collapsed" desc="Description/Instruction ">
+/**
+ * @file measure.h
+ *
+ * @brief This module has functions for signal conditioning of measured
+ *        analog feedback signals.
+ *
+ * Component: MEASURE
+ *
+ */
+// </editor-fold>
+
+// <editor-fold defaultstate="collapsed" desc="Disclaimer ">
+
 /*******************************************************************************
 * Copyright (c) 2017 released Microchip Technology Inc.  All rights reserved.
 *
 * SOFTWARE LICENSE AGREEMENT:
-* 
+*
 * Microchip Technology Incorporated ("Microchip") retains all ownership and
 * intellectual property rights in the code accompanying this message and in all
 * derivatives hereto.  You may use this code, and any derivatives created by
@@ -32,35 +46,75 @@
 * certify, or support the code.
 *
 *******************************************************************************/
-#ifndef __READADC_H
-#define __READADC_H
+// </editor-fold>
+
+#ifndef __MEASURE_H
+#define __MEASURE_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
- 
-#include <stdint.h>
-/* Read ADC Parameter data type
 
-  Description:
-    This structure will host parameters used by Read ADC function
-    parameters.
- */
+// <editor-fold defaultstate="collapsed" desc="HEADER FILES ">
+
+#include <stdint.h>
+
+// </editor-fold>
+
+// <editor-fold defaultstate="collapsed" desc="DEFINITIONS ">
+
+#define OFFSET_COUNT_BITS   (int16_t)10
+#define OFFSET_COUNT_MAX    (int16_t)(1 << OFFSET_COUNT_BITS)
+
+// </editor-fold>
+
+// <editor-fold defaultstate="collapsed" desc="VARIABLE TYPE DEFINITIONS ">
+
 typedef struct
 {
-    int16_t qK;                 
-    int16_t qADValue;           
-    int16_t qAnRef;		
-} READ_ADC_PARM_T;
+    int16_t
+        offsetIa,       /* A phase current offset */
+        offsetIb,       /* B phase current offset */
+        offsetIbus,     /* BUS current offset */
+        Ia,             /* A phase Current Feedback */
+        Ib,             /* B phase Current Feedback */
+        Ibus,           /* BUS current Feedback */
+        counter,        /* counter */
+        status;         /* flag to indicate offset measurement completion */
 
-/* Returns unsigned value 0 -> 2*iK */
-void ReadADC0( int16_t ADC_Result,READ_ADC_PARM_T* pParm );
-/* Returns signed value -2*iK -> 2*iK */
-void ReadSignedADC0( int16_t ADC_Result,READ_ADC_PARM_T* pParm ); 
+    int32_t
+        sumIa,          /* Accumulation of Ia */
+        sumIb,          /* Accumulation of Ib */
+        sumIbus;        /* Accumulation of Ibus */
 
+} MCAPP_MEASURE_CURRENT_T;
+
+typedef struct
+{
+    int16_t 
+        potValue;         /* Measure potentiometer */
+    int16_t
+        dcBusVoltage;
+    int16_t
+        MOSFETTemperatue;    
+    MCAPP_MEASURE_CURRENT_T
+        current;     /* Current measurement parameters */
+            
+}MCAPP_MEASURE_T;
+
+// </editor-fold>
+
+// <editor-fold defaultstate="expanded" desc="INTERFACE FUNCTIONS ">
+
+void MCAPP_MeasureCurrentOffset (MCAPP_MEASURE_T *);
+void MCAPP_MeasureCurrentCalibrate (MCAPP_MEASURE_T *);
+void MCAPP_MeasureCurrentInit (MCAPP_MEASURE_T *);
+int16_t MCAPP_MeasureCurrentOffsetStatus (MCAPP_MEASURE_T *);
+
+// </editor-fold>
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __READADC_H */
+#endif /* end of __MEASURE_H */

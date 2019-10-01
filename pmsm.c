@@ -123,8 +123,6 @@
 #include "estim.h"
 #include "fdweak.h"
 
-#include "readadc.h"   
-#include "meascurr.h" 
 #include "clock.h"
 #include "pwm.h"
 #include "adc.h"
@@ -133,6 +131,7 @@
 #include "board_service.h"
 #include "diagnostics.h"
 #include "singleshunt.h"
+#include "measure.h"
 
 
 volatile UGF_T uGF;
@@ -140,13 +139,8 @@ volatile UGF_T uGF;
 CTRL_PARM_T ctrlParm;
 MOTOR_STARTUP_DATA_T motorStartUpData;
 
-MEAS_CURR_PARM_T measCurrParm;   
-READ_ADC_PARM_T readADCParm;  
-
 volatile int16_t thetaElectrical = 0,thetaElectricalOpenLoop = 0;
 uint16_t pwmPeriod;
-uint16_t adcDataBuffer12=0,adcDataBuffer15=0;
-int16_t busCurrentOffset=0;
 
 MC_ALPHABETA_T valphabeta,ialphabeta;
 MC_SINCOS_T sincosTheta;
@@ -163,7 +157,7 @@ MC_PIPARMOUT_T piOutputOmega;
 
 volatile uint16_t adcDataBuffer;
 volatile uint16_t measCurrOffsetFlag = 0;
-
+MCAPP_MEASURE_T measureInputs;
 /** Definitions */
 /* Open loop angle scaling Constant - This corresponds to 1024(2^10)
    Scaling down motorStartUpData.startupRamp to thetaElectricalOpenLoop   */
@@ -211,25 +205,12 @@ int main ( void )
     LED2 = 1;
     /* Initialize Peripherals */
     InitPeripherals();
-    #ifdef SINGLE_SHUNT
-    /* Initializing Current offsets in structure variable */
-        busCurrentOffset = (int16_t)(ADCBUF_INV_A_IBUS);
-    #else
-        MeasCurrOffset(&measCurrParm.Offseta,&measCurrParm.Offsetb);
-    #endif
-
     DiagnosticsInit();
     
     BoardServiceInit();
     CORCONbits.SATA = 0;
     while(1)
     {        
-        /* Initialize PI control parameters */
-        InitControlParameters();        
-        /* Initialize estimator parameters */
-        InitEstimParm();
-        /* Initialize flux weakening parameters */
-        InitFWParams();
         /* Reset parameters used for running motor through Inverter A*/
         ResetParmeters();
         
@@ -331,7 +312,8 @@ void ResetParmeters(void)
     InitEstimParm();
     /* Initialize flux weakening parameters */
     InitFWParams();
-    
+    /* Initialize measurement parameters */
+    MCAPP_MeasureCurrentInit(&measureInputs);
     /* Enable ADC interrupt and begin main loop timing */
     ClearADCIF();
     adcDataBuffer = ClearADCIF_ReadADCBUF();
@@ -427,25 +409,21 @@ void DoControl( void )
         /* if change speed indication, double the speed */
         if(uGF.bits.ChangeSpeed)
         {
-            /* read not signed ADC */
-            ReadADC0(ADCBUF_SPEED_REF_A,&readADCParm);
             
             /* Potentiometer value is scaled between NOMINALSPEED_ELECTR and 
              * MAXIMUMSPEED_ELECTR to set the speed reference*/
-            readADCParm.qAnRef = (__builtin_muluu(readADCParm.qADValue,
+            ctrlParm.targetSpeed = (__builtin_mulss(measureInputs.potValue,
                     MAXIMUMSPEED_ELECTR-NOMINALSPEED_ELECTR)>>15)+
                     NOMINALSPEED_ELECTR;  
 
         }
         else
         {
-            /* unsigned values */
-            ReadADC0(ADCBUF_SPEED_REF_A,&readADCParm);
 
             /* Potentiometer value is scaled between ENDSPEED_ELECTR 
              * and NOMINALSPEED_ELECTR to set the speed reference*/
             
-            readADCParm.qAnRef = (__builtin_muluu(readADCParm.qADValue,
+            ctrlParm.targetSpeed = (__builtin_mulss(measureInputs.potValue,
                     NOMINALSPEED_ELECTR-ENDSPEED_ELECTR)>>15) +
                     ENDSPEED_ELECTR;  
             
@@ -458,7 +436,7 @@ void DoControl( void )
         {
             /* Ramp generator to limit the change of the speed reference
               the rate of change is defined by CtrlParm.qRefRamp */
-            ctrlParm.qDiff = ctrlParm.qVelRef - readADCParm.qAnRef;
+            ctrlParm.qDiff = ctrlParm.qVelRef - ctrlParm.targetSpeed;
             /* Speed Ref Ramp */
             if (ctrlParm.qDiff < 0)
             {
@@ -475,7 +453,7 @@ void DoControl( void )
             directly from the pot */
             if (_Q15abs(ctrlParm.qDiff) < (ctrlParm.qRefRamp << 1))
             {
-                ctrlParm.qVelRef = readADCParm.qAnRef;
+                ctrlParm.qVelRef = ctrlParm.targetSpeed;
             }
             ctrlParm.speedRampCount = 0;
         }
@@ -582,9 +560,6 @@ void DoControl( void )
  */
 void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
 {
-    /* Read ADC Buffet to Clear Flag */
-	adcDataBuffer = ClearADCIF_ReadADCBUF();
-
 #ifdef SINGLE_SHUNT 
     if(IFS4bits.PWM1IF ==1)
     {
@@ -602,7 +577,8 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
               Timer is counting up*/
             singleShuntParam.adcSamplePoint = 1;  
             /* Ibus is measured and offset removed from measurement*/
-            singleShuntParam.Ibus1 = (int16_t)(ADCBUF_INV_A_IBUS) - busCurrentOffset;                        
+            singleShuntParam.Ibus1 = (int16_t)(ADCBUF_INV_A_IBUS) - 
+                                            measureInputs.current.offsetIbus;                        
         break;
 
         case SS_SAMPLE_BUS2:
@@ -613,7 +589,8 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
             /* this interrupt corresponds to the second trigger and 
                 save second current measured*/
             /* Ibus is measured and offset removed from measurement*/
-            singleShuntParam.Ibus2 = (int16_t)(ADCBUF_INV_A_IBUS) - busCurrentOffset;
+            singleShuntParam.Ibus2 = (int16_t)(ADCBUF_INV_A_IBUS) - 
+                                            measureInputs.current.offsetIbus;
             ADCON3Lbits.SWCTRG = 1;
         break;
 
@@ -626,18 +603,20 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
 
         if(singleShuntParam.adcSamplePoint == 0)
         {
-            
+            measureInputs.current.Ia = ADCBUF_INV_A_IPHASE1;
+            measureInputs.current.Ib = ADCBUF_INV_A_IPHASE2; 
+
 #ifdef SINGLE_SHUNT
                 
             /* Reconstruct Phase currents from Bus Current*/                
             SingleShunt_PhaseCurrentReconstruction(&singleShuntParam);
-            MeasCompCurr(ADCBUF_INV_A_IPHASE1, ADCBUF_INV_A_IPHASE2,&measCurrParm);
+            MCAPP_MeasureCurrentCalibrate(&measureInputs);
             iabc.a = singleShuntParam.Ia;
             iabc.b = singleShuntParam.Ib;
 #else
-            MeasCompCurr(ADCBUF_INV_A_IPHASE1, ADCBUF_INV_A_IPHASE2,&measCurrParm);
-            iabc.a = measCurrParm.qIa;
-            iabc.b = measCurrParm.qIb;
+            MCAPP_MeasureCurrentCalibrate(&measureInputs);
+            iabc.a = measureInputs.current.Ia;
+            iabc.b = measureInputs.current.Ib;
 #endif
             /* Calculate qId,qIq from qSin,qCos,qIa,qIb */
             MC_TransformClarke_Assembly(&iabc,&ialphabeta);
@@ -702,11 +681,27 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
     
     if(singleShuntParam.adcSamplePoint == 0)
     {
-        adcDataBuffer12 = ADCBUF12;
-        adcDataBuffer15 = ADCBUF15;
+        if(uGF.bits.RunMotor == 0)
+        {
+            measureInputs.current.Ia = ADCBUF_INV_A_IPHASE1;
+            measureInputs.current.Ib = ADCBUF_INV_A_IPHASE2; 
+            measureInputs.current.Ibus = ADCBUF_INV_A_IPHASE2; 
+        }
+        if(MCAPP_MeasureCurrentOffsetStatus(&measureInputs) == 0)
+        {
+            MCAPP_MeasureCurrentOffset(&measureInputs);
+        }
+        else
+        {
+            BoardServiceStepIsr(); 
+        }
+        measureInputs.potValue = (int16_t)( ADCBUF_SPEED_REF_A>>1);
+        measureInputs.dcBusVoltage = (int16_t)( ADCBUF_VBUS_A>>1);
+        measureInputs.MOSFETTemperatue = (int16_t)( ADCBUF_MOSFET_TEMP_A>>1);
         DiagnosticsStepIsr();
-        BoardServiceStepIsr();
     }
+    /* Read ADC Buffet to Clear Flag */
+	adcDataBuffer = ClearADCIF_ReadADCBUF();
     ClearADCIF();   
 }
 // *****************************************************************************
@@ -794,11 +789,6 @@ void CalculateParkAngle(void)
  */
 void InitControlParameters(void)
 {
-    /* ADC - Measure Current & Pot */
-    /* Scaling constants: Determined by calibration or hardware design.*/
-    readADCParm.qK = KPOT;
-    measCurrParm.qKa = KCURRA;
-    measCurrParm.qKb = KCURRB;
     
     ctrlParm.qRefRamp = SPEEDREFRAMP;
     ctrlParm.speedRampCount = SPEEDREFRAMP_COUNT;
@@ -832,53 +822,6 @@ void InitControlParameters(void)
     piInputOmega.piState.integrator = 0;
     piOutputOmega.out = 0;
 }
-// *****************************************************************************
-/* Function:
-    measCurrOffset()
-
-  Summary:
-    Routine initializes Offset values of current
-  Precondition:
-    None.
-
-  Parameters:
-    None
-
-  Returns:
-    None.
-
-  Remarks:
-    None.
- */
-void MeasCurrOffset(int16_t *pOffseta,int16_t *pOffsetb)
-{    
-    int32_t adcOffsetIa = 0, adcOffsetIb = 0;
-    uint16_t i = 0;
-                
-    /* Enable ADC interrupt and begin main loop timing */
-    ClearADCIF();
-    adcDataBuffer = ClearADCIF_ReadADCBUF();
-    EnableADCInterrupt();
-    
-    /* Taking multiple sample to measure voltage offset in all the channels */
-    for (i = 0; i < (1<<CURRENT_OFFSET_SAMPLE_SCALER); i++)
-    {
-        measCurrOffsetFlag = 0;
-        /* Wait for the conversion to complete */
-        while (measCurrOffsetFlag == 1);
-        /* Sum up the converted results */
-        adcOffsetIa += ADCBUF_INV_A_IPHASE1;
-        adcOffsetIb += ADCBUF_INV_A_IPHASE2;
-    }
-    /* Averaging to find current Ia offset */
-    *pOffseta = (int16_t)(adcOffsetIa >> CURRENT_OFFSET_SAMPLE_SCALER);
-    /* Averaging to find current Ib offset*/
-    *pOffsetb = (int16_t)(adcOffsetIb >> CURRENT_OFFSET_SAMPLE_SCALER);
-    measCurrOffsetFlag = 0;
-    
-    /* Make sure ADC does not generate interrupt while initializing parameters*/
-    DisableADCInterrupt();
-}
 
 void PWMDutyCycleSet(MC_DUTYCYCLEOUT_T *pPwmDutycycle)
 {
@@ -901,7 +844,7 @@ void PWMDutyCycleSet(MC_DUTYCYCLEOUT_T *pPwmDutycycle)
 }
 void PWMDutyCycleSetDualEdge(MC_DUTYCYCLEOUT_T *pPwmDutycycle1,MC_DUTYCYCLEOUT_T *pPwmDutycycle2)
 {
-    if(pPwmDutycycle1->dutycycle1 < MIN_DUTY)
+    if(pPwmDutycycle1->dutycycle1 > MIN_DUTY)
     {
         pPwmDutycycle1->dutycycle1 = MIN_DUTY;
     }
@@ -919,20 +862,21 @@ void PWMDutyCycleSetDualEdge(MC_DUTYCYCLEOUT_T *pPwmDutycycle1,MC_DUTYCYCLEOUT_T
     INVERTERA_PWM_PHASE1 = pPwmDutycycle1->dutycycle1 + (DDEADTIME>>1);
     
     
-    if(pPwmDutycycle2->dutycycle1 < MIN_DUTY)
+    if(pPwmDutycycle2->dutycycle1 < (DDEADTIME>>1))
     {
-        pPwmDutycycle2->dutycycle1 = MIN_DUTY;
+        pPwmDutycycle2->dutycycle1 = (DDEADTIME>>1);
     }
-    if(pPwmDutycycle2->dutycycle2<MIN_DUTY)
+    if(pPwmDutycycle2->dutycycle2 < (DDEADTIME>>1))
     {
-        pPwmDutycycle2->dutycycle2 = MIN_DUTY;
+        pPwmDutycycle2->dutycycle2 = (DDEADTIME>>1);
     }
-    if(pPwmDutycycle2->dutycycle3<MIN_DUTY)
+    if(pPwmDutycycle2->dutycycle3 < (DDEADTIME>>1))
     {
-        pPwmDutycycle2->dutycycle3 = MIN_DUTY;
+        pPwmDutycycle2->dutycycle3 = (DDEADTIME>>1);
     }
     
     INVERTERA_PWM_PDC3 = pPwmDutycycle2->dutycycle3 - (DDEADTIME>>1);
     INVERTERA_PWM_PDC2 = pPwmDutycycle2->dutycycle2 - (DDEADTIME>>1);
     INVERTERA_PWM_PDC1 = pPwmDutycycle2->dutycycle1 - (DDEADTIME>>1);
 }
+

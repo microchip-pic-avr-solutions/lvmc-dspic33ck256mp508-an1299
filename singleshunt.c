@@ -37,7 +37,7 @@
 #include <libq.h>
 #include "userparms.h"
 #include "singleshunt.h"
-#include "meascurr.h"
+
 
 SINGLE_SHUNT_PARM_T singleShuntParam;
 inline static void SingleShunt_CalculateSwitchingTime(SINGLE_SHUNT_PARM_T *,uint16_t );

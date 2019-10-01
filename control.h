@@ -59,9 +59,11 @@ typedef struct
     /* Ramp for speed reference value */
     int16_t   qRefRamp;
     /* Speed of the ramp */
-    int16_t   qDiff;	  
+    int16_t   qDiff;
+    /* Target Speed*/
+    int16_t  targetSpeed;
     /* The Speed Control Loop will be executed only every speedRampCount*/
-    int16_t   speedRampCount;    
+    int16_t   speedRampCount;  
 } CTRL_PARM_T;
 /* Motor Parameter data type
 

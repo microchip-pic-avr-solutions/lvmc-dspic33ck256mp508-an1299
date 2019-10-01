@@ -12,6 +12,7 @@
         <itemPath>../hal/port_config.h</itemPath>
         <itemPath>../hal/pwm.h</itemPath>
         <itemPath>../hal/uart1.h</itemPath>
+        <itemPath>../hal/measure.h</itemPath>
       </logicalFolder>
       <logicalFolder name="lib" displayName="lib" projectFiles="true">
         <logicalFolder name="f1" displayName="motor_control" projectFiles="true">
@@ -28,11 +29,7 @@
       <itemPath>../estim.h</itemPath>
       <itemPath>../fdweak.h</itemPath>
       <itemPath>../general.h</itemPath>
-      <itemPath>../meascurr.h</itemPath>
-      <itemPath>../meascurr.inc</itemPath>
       <itemPath>../motor_control_noinline.h</itemPath>
-      <itemPath>../readadc.h</itemPath>
-      <itemPath>../readadc.inc</itemPath>
       <itemPath>../userparms.h</itemPath>
       <itemPath>../X2CScope.h</itemPath>
       <itemPath>../singleshunt.h</itemPath>
@@ -51,6 +48,7 @@
         <itemPath>../hal/port_config.c</itemPath>
         <itemPath>../hal/pwm.c</itemPath>
         <itemPath>../hal/uart1.c</itemPath>
+        <itemPath>../hal/measure.c</itemPath>
       </logicalFolder>
       <logicalFolder name="lib" displayName="lib" projectFiles="true">
         <logicalFolder name="f1" displayName="motor_control" projectFiles="true">
@@ -69,9 +67,7 @@
       <itemPath>../estim.c</itemPath>
       <itemPath>../fdweak.c</itemPath>
       <itemPath>../pmsm.c</itemPath>
-      <itemPath>../meascurr.s</itemPath>
       <itemPath>../q15sqrt.s</itemPath>
-      <itemPath>../readadc0.s</itemPath>
       <itemPath>../diagnostics_x2cscope.c</itemPath>
       <itemPath>../singleshunt.c</itemPath>
     </logicalFolder>
