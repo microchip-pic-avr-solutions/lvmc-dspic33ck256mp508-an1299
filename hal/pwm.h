@@ -80,7 +80,10 @@
 #define INVERTERA_PWM_TRIGA      PG1TRIGA 
 #define INVERTERA_PWM_TRIGB      PG1TRIGB   
 #define INVERTERA_PWM_TRIGC      PG1TRIGC         
-
+        
+#define _PWMInterrupt           _PWM1Interrupt
+#define ClearPWMIF()            _PWM1IF = 0        
+        
 /* Specify PWM Frequency in Hertz */
 #define PWMFREQUENCY_HZ         20000
 /* Specify dead time in micro seconds */
@@ -97,7 +100,7 @@
 #define BOOTSTRAP_CHARGING_COUNTS (uint16_t)((BOOTSTRAP_CHARGING_TIME_SECS/LOOPTIME_SEC )* 2)
         
 // Definition to enable or disable PWM Fault
-#undef ENABLE_PWM_FAULT
+#define ENABLE_PWM_FAULT
         
 #define DDEADTIME               (uint16_t)(DEADTIME_MICROSEC*FOSC_MHZ)
 // loop time in terms of PWM clock period

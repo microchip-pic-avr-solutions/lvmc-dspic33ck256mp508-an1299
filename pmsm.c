@@ -156,7 +156,6 @@ MC_PIPARMIN_T piInputOmega;
 MC_PIPARMOUT_T piOutputOmega;
 
 volatile uint16_t adcDataBuffer;
-volatile uint16_t measCurrOffsetFlag = 0;
 MCAPP_MEASURE_T measureInputs;
 /** Definitions */
 /* Open loop angle scaling Constant - This corresponds to 1024(2^10)
@@ -169,7 +168,6 @@ void InitControlParameters(void);
 void DoControl( void );
 void CalculateParkAngle(void);
 void ResetParmeters(void);
-void MeasCurrOffset(int16_t *,int16_t *);
 void PWMDutyCycleSetDualEdge(MC_DUTYCYCLEOUT_T *,MC_DUTYCYCLEOUT_T *);
 void PWMDutyCycleSet(MC_DUTYCYCLEOUT_T *);
 void pwmDutyCycleLimitCheck(MC_DUTYCYCLEOUT_T *,uint16_t,uint16_t);
@@ -230,6 +228,7 @@ int main ( void )
                 {
                     EnablePWMOutputsInverterA();
                     uGF.bits.RunMotor = 1;
+                    LED1 = 0;
                 }
 
             }
@@ -315,6 +314,9 @@ void ResetParmeters(void)
     InitFWParams();
     /* Initialize measurement parameters */
     MCAPP_MeasureCurrentInit(&measureInputs);
+
+    MCAPP_MeasureAvgInit(&measureInputs.MOSFETTemperature,
+            MOSFET_TEMP_AVG_FILTER_SCALE);
     /* Enable ADC interrupt and begin main loop timing */
     ClearADCIF();
     adcDataBuffer = ClearADCIF_ReadADCBUF();
@@ -698,7 +700,9 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
         }
         measureInputs.potValue = (int16_t)( ADCBUF_SPEED_REF_A>>1);
         measureInputs.dcBusVoltage = (int16_t)( ADCBUF_VBUS_A>>1);
-        measureInputs.MOSFETTemperatue = (int16_t)( ADCBUF_MOSFET_TEMP_A>>1);
+        
+        MCAPP_MeasureTemperature(&measureInputs,(int16_t)(ADCBUF_MOSFET_TEMP_A>>1));
+        
         DiagnosticsStepIsr();
     }
     /* Read ADC Buffet to Clear Flag */
@@ -875,3 +879,10 @@ void pwmDutyCycleLimitCheck (MC_DUTYCYCLEOUT_T *pPwmDutycycle,uint16_t min,uint1
     }
 }
 
+void __attribute__((__interrupt__,no_auto_psv)) _PWMInterrupt()
+{
+    ResetParmeters();
+    ClearPWMPCIFaultInverterA();
+    LED1 = 1; 
+    ClearPWMIF(); 
+}

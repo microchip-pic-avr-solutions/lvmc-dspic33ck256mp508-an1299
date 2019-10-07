@@ -153,7 +153,7 @@ void InitPWMGenerators(void)
     InitDutyPWM124Generators();
 
     IFS4bits.PWM1IF = 0;
-    IEC4bits.PWM1IE = 0;
+    IEC4bits.PWM1IE = 1;
     IPC16bits.PWM1IP = 7;
 	PG2CONLbits.ON = 1;      // Enable PWM module after initializing generators
     PG4CONLbits.ON = 1;      // Enable PWM module after initializing generators
@@ -506,8 +506,8 @@ void InitPWMGenerator1 (void)
     /* Initialize PWM GENERATOR 1 EVENT REGISTER HIGH */
     PG1EVTH      = 0x0000;
     /* FLTIEN: PCI Fault Interrupt Enable bit
-       0 = Fault interrupt is disabled */
-    PG1EVTHbits.FLTIEN = 0;
+       1 = Fault interrupt is enabled */
+    PG1EVTHbits.FLTIEN = 1;
     /* PCI Current Limit Interrupt Enable bit
        0 = Current limit interrupt is disabled */
     PG1EVTHbits.CLIEN = 0;
@@ -522,7 +522,7 @@ void InitPWMGenerator1 (void)
        01 = Interrupts CPU at TRIGA compare event
        10 = Interrupts CPU at ADC Trigger 1 event
        11 = Time base interrupts are disabled */
-    PG1EVTHbits.IEVTSEL = 0;
+    PG1EVTHbits.IEVTSEL = 3;
 #ifdef SINGLE_SHUNT
     /* ADC Trigger 2 Source is PG1TRIGC Compare Event Enable bit
        0 = PG1TRIGC register compare event is enabled as 
@@ -565,7 +565,7 @@ void InitPWMGenerator1 (void)
     /* Termination Event Selection bits
        001 = Auto-Terminate: Terminate when PCI source transitions from 
              active to inactive */
-    PG1FPCILbits.TERM = 1;
+    PG1FPCILbits.TERM = 0;
     /* Acceptance Qualifier Polarity Select bit: 0 = Not inverted 1 = Inverted*/
     PG1FPCILbits.AQPS = 0;
     /* Acceptance Qualifier Source Selection bits
@@ -583,13 +583,13 @@ void InitPWMGenerator1 (void)
        0 = PCI source is not synchronized to PWM EOC*/
     PG1FPCILbits.PSYNC = 0;
     /* PCI Polarity Select bit 0 = Not inverted 1 = Inverted */
-    PG1FPCILbits.PPS = 1;
+    PG1FPCILbits.PPS = 0;
     /* PCI Source Selection bits
        11111 = PCI Source #31
        ? ?
        00001 = PCI Source #1
        00000 = Software PCI control bit (SWPCI) only*/
-    PG1FPCILbits.PSS = 19;
+    PG1FPCILbits.PSS = 0b11011;
     
     /* PWM GENERATOR 1 Fault PCI REGISTER HIGH */
     PG1FPCIH     = 0x0000;
@@ -606,7 +606,7 @@ void InitPWMGenerator1 (void)
        010 = Any edge
        001 = Rising edge
        000 = Level-sensitive*/
-    PG1FPCIHbits.ACP   = 0;
+    PG1FPCIHbits.ACP   = 3;
     /* PCI SR Latch Mode bit
        1 = SR latch is Reset-dominant in Latched Acceptance modes
        0 = SR latch is Set-dominant in Latched Acceptance modes*/
@@ -890,7 +890,7 @@ void InitPWMGenerator2 (void)
     /* Termination Event Selection bits
        001 = Auto-Terminate: Terminate when PCI source transitions from 
              active to inactive */
-    PG2FPCILbits.TERM = 1;
+    PG2FPCILbits.TERM = 0;
     /* Acceptance Qualifier Polarity Select bit: 0 = Not inverted 1 = Inverted*/
     PG2FPCILbits.AQPS = 0;
     /* Acceptance Qualifier Source Selection bits
@@ -908,13 +908,13 @@ void InitPWMGenerator2 (void)
        0 = PCI source is not synchronized to PWM EOC*/
     PG2FPCILbits.PSYNC = 0;
     /* PCI Polarity Select bit 0 = Not inverted 1 = Inverted*/
-    PG2FPCILbits.PPS = 1;
+    PG2FPCILbits.PPS = 0;
     /* PCI Source Selection bits
        11111 = PCI Source #31
        ? ?
        00001 = PCI Source #1
        00000 = Software PCI control bit (SWPCI) only*/
-    PG2FPCILbits.PSS = 19;
+    PG2FPCILbits.PSS = 0b11011;
     
     /* PWM GENERATOR 1 Fault PCI REGISTER HIGH */
     PG2FPCIH     = 0x0000;
@@ -931,7 +931,7 @@ void InitPWMGenerator2 (void)
        010 = Any edge
        001 = Rising edge
        000 = Level-sensitive*/
-    PG2FPCIHbits.ACP   = 0;
+    PG2FPCIHbits.ACP   = 3;
     /* PCI SR Latch Mode bit
        1 = SR latch is Reset-dominant in Latched Acceptance modes
        0 = SR latch is Set-dominant in Latched Acceptance modes*/
@@ -1216,7 +1216,7 @@ void InitPWMGenerator4 (void)
     /* Termination Event Selection bits
        001 = Auto-Terminate: Terminate when PCI source transitions from 
              active to inactive */
-    PG4FPCILbits.TERM = 1;
+    PG4FPCILbits.TERM = 0;
     /* Acceptance Qualifier Polarity Select bit: 0 = Not inverted 1 = Inverted*/
     PG4FPCILbits.AQPS = 0;
     /* Acceptance Qualifier Source Selection bits
@@ -1234,13 +1234,13 @@ void InitPWMGenerator4 (void)
        0 = PCI source is not synchronized to PWM EOC*/
     PG4FPCILbits.PSYNC = 0;
     /* PCI Polarity Select bit 0 = Not inverted 1 = Inverted*/
-    PG4FPCILbits.PPS = 1;
+    PG4FPCILbits.PPS = 0;
     /* PCI Source Selection bits
        11111 = PCI Source #31
        ? ?
        00001 = PCI Source #1
        00000 = Software PCI control bit (SWPCI) only*/
-    PG4FPCILbits.PSS = 19;
+    PG4FPCILbits.PSS = 0b11011;
     
     /* PWM GENERATOR 1 Fault PCI REGISTER HIGH */
     PG4FPCIH     = 0x0000;
@@ -1257,7 +1257,7 @@ void InitPWMGenerator4 (void)
        010 = Any edge
        001 = Rising edge
        000 = Level-sensitive*/
-    PG4FPCIHbits.ACP   = 0;
+    PG4FPCIHbits.ACP   = 3;
     /* PCI SR Latch Mode bit
        1 = SR latch is Reset-dominant in Latched Acceptance modes
        0 = SR latch is Set-dominant in Latched Acceptance modes*/

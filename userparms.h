@@ -45,6 +45,7 @@ extern "C" {
 // *****************************************************************************
 #include <stdint.h>
 #include <xc.h>
+#include "general.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -80,7 +81,7 @@ controllers, tuning mode will disable the speed PI controller */
 #undef TORQUE_MODE
 /* FOC with single shunt is enabled */
 /* undef to work with dual Shunt  */    
-#undef SINGLE_SHUNT     
+#define SINGLE_SHUNT     
 
 #define INTERNAL_OPAMP_CONFIG    
 
@@ -161,6 +162,9 @@ before the open loop speed ramp up */
 #define OPENLOOP_RAMPSPEED_INCREASERATE 10
 /* Open loop q current setup - */
 #define Q_CURRENT_REF_OPENLOOP NORM_CURRENT(1.0)
+
+/* Specify Over Current Limit - DC BUS */
+#define Q15_OVER_CURRENT_THRESHOLD NORM_CURRENT(2.5)
 
 /* Maximum motor speed converted into electrical speed */
 #define MAXIMUMSPEED_ELECTR MAXIMUM_SPEED_RPM*NOPOLESPAIRS

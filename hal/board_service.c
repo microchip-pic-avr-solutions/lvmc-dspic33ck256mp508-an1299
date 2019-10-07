@@ -36,8 +36,10 @@
 #include <stdbool.h>
 #include "port_config.h"
 #include "board_service.h"
+#include "userparms.h"
 #include "adc.h"
 #include "pwm.h"
+#include "cmp.h"
 
 BUTTON_T buttonStartStop;
 BUTTON_T buttonSpeedHalfDouble;
@@ -46,6 +48,7 @@ uint16_t boardServiceISRCounter = 0;
 
 void DisablePWMOutputsInverterA(void);
 void EnablePWMOutputsInverterA(void);
+void ClearPWMPCIFaultInverterA(void);
 void BoardServiceInit(void);
 void BoardServiceStepIsr(void);
 void BoardService(void);
@@ -166,7 +169,13 @@ void ButtonGroupInitialize(void)
     None.
  */
 void InitPeripherals(void)
-{                
+{        
+    uint16_t cmpReference = 0;
+    CMP_Initialize();
+    CMP1_ModuleEnable(true);
+    cmpReference = (uint16_t)(__builtin_mulss(Q15_OVER_CURRENT_THRESHOLD,2047)>>15);
+    cmpReference = cmpReference + 2048; 
+    CMP1_ReferenceSet(cmpReference);
     InitializeADCs();
     
     InitPWMGenerators();
@@ -230,4 +239,12 @@ void EnablePWMOutputsInverterA(void)
     PG1IOCONLbits.OVRENH = 0;  
     // 0 = PWM Generator provides data for the PWM1L pin
     PG1IOCONLbits.OVRENL = 0;     
+}
+
+void ClearPWMPCIFaultInverterA(void)
+{
+    
+    PG1FPCILbits.SWTERM = 1;
+    PG2FPCILbits.SWTERM = 1;
+    PG4FPCILbits.SWTERM = 1;
 }

@@ -145,3 +145,73 @@ int16_t MCAPP_MeasureCurrentOffsetStatus (MCAPP_MEASURE_T *pMotorInputs)
 {
     return pMotorInputs->current.status;
 }
+
+/**
+* <B> Function: void MC_MovingAvgFilterInit(MC_MOVING_AVG_T *)              </B>
+*
+* @brief Function to reset moving average filter history .
+*
+* @param none.
+* @return none.
+* @example
+* <CODE> MC_MovingAvgFilterInit(&filterData); </CODE>
+*
+*/
+void MCAPP_MeasureAvgInit(MCAPP_MEASURE_AVG_T *pFilterData,uint16_t scaler)
+{
+    pFilterData->scaler = scaler;
+    pFilterData->maxIndex = (uint16_t)((1 << scaler));
+    pFilterData->index = 0;
+    pFilterData->sum = 0;
+    pFilterData->status = 0;
+}
+/**
+* <B> Function: void MC_MovingAvgFilter(MC_MOVING_AVG_T *,int16_t )         </B>
+*
+* @brief Function implementing moving average filter .
+*
+* @param none.
+* @return none.
+* @example
+* <CODE> MC_MovingAvgFilter(&filterData,data );                          </CODE>
+*
+*/
+int16_t MCAPP_MeasureAvg(MCAPP_MEASURE_AVG_T *pFilterData)
+{    
+    pFilterData->sum += pFilterData->input;
+
+    if(pFilterData->index < pFilterData->maxIndex)
+    {
+        pFilterData->index++;
+    }
+    else
+    {
+        pFilterData->avg = pFilterData->sum >> pFilterData->scaler; 
+        pFilterData->sum = 0;
+        pFilterData->index = 0;
+        pFilterData->status = 1;
+    }
+    return pFilterData->avg;
+}
+/**
+* <B> Function: void MC_MovingAvgFilterInit(MC_MOVING_AVG_T *)              </B>
+*
+* @brief Function to reset moving average filter history .
+*
+* @param none.
+* @return none.
+* @example
+* <CODE> MC_MovingAvgFilterInit(&filterData); </CODE>
+*
+*/
+void MCAPP_MeasureTemperature(MCAPP_MEASURE_T *pData, int16_t input)
+{
+    pData->MOSFETTemperature.input = input;
+    pData->MOSFETTemperatureAvg = MCAPP_MeasureAvg(&pData->MOSFETTemperature);
+    if(pData->MOSFETTemperature.status == 1)
+    {
+        pData->MOSFETTemperatureAvg = (int16_t)(__builtin_mulss
+                ((pData->MOSFETTemperatureAvg-OFFSET_COUNT_MOSFET_TEMP) ,
+                MOSFET_TEMP_COEFF) >> 15);
+    }
+}
