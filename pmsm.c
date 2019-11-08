@@ -486,6 +486,7 @@ void DoControl( void )
             /* Just changed from open loop */
             uGF.bits.ChangeMode = 0;
             piInputOmega.piState.integrator = (int32_t)ctrlParm.qVqRef << 13;
+            ctrlParm.qVelRef = ENDSPEED_ELECTR;
         }
 
         /* If TORQUE MODE skip the speed controller */
@@ -688,7 +689,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _ADCInterrupt()
         {
             measureInputs.current.Ia = ADCBUF_INV_A_IPHASE1;
             measureInputs.current.Ib = ADCBUF_INV_A_IPHASE2; 
-            measureInputs.current.Ibus = ADCBUF_INV_A_IPHASE2; 
+            measureInputs.current.Ibus = ADCBUF_INV_A_IBUS; 
         }
         if(MCAPP_MeasureCurrentOffsetStatus(&measureInputs) == 0)
         {
