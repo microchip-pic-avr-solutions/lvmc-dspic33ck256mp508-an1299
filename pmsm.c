@@ -241,8 +241,6 @@ int main ( void )
                 }
             }
 
-            /* LED1 is used as motor run Status */
-        //    LED1 = uGF.bits.RunMotor;
         }
 
     } // End of Main loop
