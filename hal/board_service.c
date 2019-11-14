@@ -54,6 +54,9 @@ void BoardServiceStepIsr(void);
 void BoardService(void);
 bool IsPressed_Button1(void);
 bool IsPressed_Button2(void);
+void PWMDutyCycleSetDualEdge(MC_DUTYCYCLEOUT_T *,MC_DUTYCYCLEOUT_T *);
+void PWMDutyCycleSet(MC_DUTYCYCLEOUT_T *);
+void pwmDutyCycleLimitCheck(MC_DUTYCYCLEOUT_T *,uint16_t,uint16_t);
 
 static void ButtonGroupInitialize(void);
 static void ButtonScan(BUTTON_T * ,bool);
@@ -247,4 +250,55 @@ void ClearPWMPCIFaultInverterA(void)
     PG1FPCILbits.SWTERM = 1;
     PG2FPCILbits.SWTERM = 1;
     PG4FPCILbits.SWTERM = 1;
+}
+
+void PWMDutyCycleSet(MC_DUTYCYCLEOUT_T *pPwmDutycycle)
+{
+    pwmDutyCycleLimitCheck(pPwmDutycycle,(DDEADTIME>>1),(LOOPTIME_TCY - (DDEADTIME>>1)));  
+    INVERTERA_PWM_PDC3 = pPwmDutycycle->dutycycle3;
+    INVERTERA_PWM_PDC2 = pPwmDutycycle->dutycycle2;
+    INVERTERA_PWM_PDC1 = pPwmDutycycle->dutycycle1;
+}
+void PWMDutyCycleSetDualEdge(MC_DUTYCYCLEOUT_T *pPwmDutycycle1,MC_DUTYCYCLEOUT_T *pPwmDutycycle2)
+{
+    pwmDutyCycleLimitCheck(pPwmDutycycle1,(DDEADTIME>>1),(LOOPTIME_TCY - (DDEADTIME>>1)));
+    
+    INVERTERA_PWM_PHASE3 = pPwmDutycycle1->dutycycle3 + (DDEADTIME>>1);
+    INVERTERA_PWM_PHASE2 = pPwmDutycycle1->dutycycle2 + (DDEADTIME>>1);
+    INVERTERA_PWM_PHASE1 = pPwmDutycycle1->dutycycle1 + (DDEADTIME>>1);
+    
+    pwmDutyCycleLimitCheck(pPwmDutycycle2,(DDEADTIME>>1),(LOOPTIME_TCY - (DDEADTIME>>1)));
+    
+    INVERTERA_PWM_PDC3 = pPwmDutycycle2->dutycycle3 - (DDEADTIME>>1);
+    INVERTERA_PWM_PDC2 = pPwmDutycycle2->dutycycle2 - (DDEADTIME>>1);
+    INVERTERA_PWM_PDC1 = pPwmDutycycle2->dutycycle1 - (DDEADTIME>>1);
+}
+void pwmDutyCycleLimitCheck (MC_DUTYCYCLEOUT_T *pPwmDutycycle,uint16_t min,uint16_t max)
+{
+    if(pPwmDutycycle->dutycycle1 < min)
+    {
+        pPwmDutycycle->dutycycle1 = min;
+    }
+    else if(pPwmDutycycle->dutycycle1 > max)
+    {
+        pPwmDutycycle->dutycycle1 = max;
+    }
+    
+    if(pPwmDutycycle->dutycycle2 < min)
+    {
+        pPwmDutycycle->dutycycle2 = min;
+    }
+    else if(pPwmDutycycle->dutycycle2 > max)
+    {
+        pPwmDutycycle->dutycycle2 = max;
+    }
+    
+    if(pPwmDutycycle->dutycycle3 < min)
+    {
+        pPwmDutycycle->dutycycle3 = min;
+    }
+    else if(pPwmDutycycle->dutycycle3 > max)
+    {
+        pPwmDutycycle->dutycycle3 = max;
+    }
 }

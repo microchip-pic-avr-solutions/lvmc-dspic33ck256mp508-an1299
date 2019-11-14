@@ -14,6 +14,7 @@
         <itemPath>../hal/uart1.h</itemPath>
         <itemPath>../hal/measure.h</itemPath>
         <itemPath>../hal/cmp.h</itemPath>
+        <itemPath>../hal/device_config.c</itemPath>
       </logicalFolder>
       <logicalFolder name="lib" displayName="lib" projectFiles="true">
         <logicalFolder name="f1" displayName="motor_control" projectFiles="true">

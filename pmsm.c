@@ -32,83 +32,6 @@
 * certify, or support the code.
 *
 *******************************************************************************/
-// FSEC
-#pragma config BWRP = OFF               // Boot Segment Write-Protect bit (Boot Segment may be written)
-#pragma config BSS = DISABLED           // Boot Segment Code-Protect Level bits (No Protection (other than BWRP))
-#pragma config BSEN = OFF               // Boot Segment Control bit (No Boot Segment)
-#pragma config GWRP = OFF               // General Segment Write-Protect bit (General Segment may be written)
-#pragma config GSS = DISABLED           // General Segment Code-Protect Level bits (No Protection (other than GWRP))
-#pragma config CWRP = OFF               // Configuration Segment Write-Protect bit (Configuration Segment may be written)
-#pragma config CSS = DISABLED           // Configuration Segment Code-Protect Level bits (No Protection (other than CWRP))
-#pragma config AIVTDIS = OFF            // Alternate Interrupt Vector Table bit (Disabled AIVT)
-
-// FBSLIM
-#pragma config BSLIM = 0x1FFF           // Boot Segment Flash Page Address Limit bits (Boot Segment Flash page address  limit)
-
-// FSIGN
-
-// FOSCSEL
-#pragma config FNOSC = FRC              // Oscillator Source Selection (Internal Fast RC (FRC))
-#pragma config IESO = OFF               // Two-speed Oscillator Start-up Enable bit (Start up with user-selected oscillator source)
-
-// FOSC
-#pragma config POSCMD = NONE            // Primary Oscillator Mode Select bits (Primary Oscillator disabled)
-#pragma config OSCIOFNC = ON            // OSC2 Pin Function bit (OSC2 is general purpose digital I/O pin)
-#pragma config FCKSM = CSECMD           // Clock Switching Mode bits (Clock switching is enabled,Fail-safe Clock Monitor is disabled)
-#pragma config XTCFG = G3               // XT Config (24-32 MHz crystals)
-#pragma config XTBST = DISABLE           // XT Boost (Boost the kick-start)
-
-// FWDT
-#pragma config RWDTPS = PS1048576       // Run Mode Watchdog Timer Post Scaler select bits (1:1048576)
-#pragma config RCLKSEL = LPRC           // Watchdog Timer Clock Select bits (Always use LPRC)
-#pragma config WINDIS = ON              // Watchdog Timer Window Enable bit (Watchdog Timer operates in Non-Window mode)
-#pragma config WDTWIN = WIN25           // Watchdog Timer Window Select bits (WDT Window is 25% of WDT period)
-#pragma config SWDTPS = PS1048576       // Sleep Mode Watchdog Timer Post Scaler select bits (1:1048576)
-#pragma config FWDTEN = ON_SW           // Watchdog Timer Enable bit (WDT controlled via SW, use WDTCON.ON bit)
-
-// FPOR
-#pragma config BISTDIS = DISABLED       // Memory BIST Feature Disable (mBIST on reset feature disabled)
-
-// FICD
-#pragma config ICS = PGD3               // ICD Communication Channel Select bits (Communicate on PGEC3 and PGED3)
-#pragma config JTAGEN = OFF             // JTAG Enable bit (JTAG is disabled)
-#pragma config NOBTSWP = DISABLED       // BOOTSWP instruction disable bit (BOOTSWP instruction is disabled)
-
-// FDMTIVTL
-#pragma config DMTIVTL = 0x0         // Dead Man Timer Interval low word (Lower 16 bits of 32 bitDMT window interval (0-0xFFFF))
-
-// FDMTIVTH
-#pragma config DMTIVTH = 0x0        // Dead Man Timer Interval high word (Uper 16 bits of 32 bitDMT window interval (0-0xFFFF))
-
-// FDMTCNTL
-#pragma config DMTCNTL = 0x0         // Lower 16 bits of 32 bit DMT instruction count time-out value (0-0xFFFF) (Lower 16 bits of 32 bit DMT instruction count time-out value (0-0xFFFF))
-
-// FDMTCNTH
-#pragma config DMTCNTH = 0x0         // Upper 16 bits of 32 bit DMT instruction count time-out value (0-0xFFFF) (Upper 16 bits of 32 bit DMT instruction count time-out value (0-0xFFFF))
-
-// FDMT
-#pragma config DMTDIS = OFF             // Dead Man Timer Disable bit (Dead Man Timer is Disabled and can be enabled by software)
-
-// FDEVOPT
-#pragma config ALTI2C1 = OFF            // Alternate I2C1 Pin bit (I2C1 mapped to SDA1/SCL1 pins)
-#pragma config ALTI2C2 = OFF            // Alternate I2C2 Pin bit (I2C2 mapped to SDA2/SCL2 pins)
-#pragma config ALTI2C3 = OFF            // Alternate I2C3 Pin bit (I2C3 mapped to SDA3/SCL3 pins)
-#pragma config SMBEN = SMBUS            // SM Bus Enable (SMBus input threshold is enabled)
-#pragma config SPI2PIN = PPS            // SPI2 Pin Select bit (SPI2 uses I/O remap (PPS) pins)
-
-// FALTREG
-#pragma config CTXT1 = OFF              // Specifies Interrupt Priority Level (IPL) Associated to Alternate Working Register 1 bits (Not Assigned)
-#pragma config CTXT2 = OFF              // Specifies Interrupt Priority Level (IPL) Associated to Alternate Working Register 2 bits (Not Assigned)
-#pragma config CTXT3 = OFF              // Specifies Interrupt Priority Level (IPL) Associated to Alternate Working Register 3 bits (Not Assigned)
-#pragma config CTXT4 = OFF              // Specifies Interrupt Priority Level (IPL) Associated to Alternate Working Register 4 bits (Not Assigned)
-
-// FBTSEQ
-#pragma config BSEQ = 0xFFF             // Relative value defining which partition will be active after device Reset; the partition containing a lower boot number will be active (Boot Sequence Number bits)
-#pragma config IBSEQ = 0xFFF            // The one's complement of BSEQ; must be calculated by the user and written during device programming. (Inverse Boot Sequence Number bits)
-
-// #pragma config statements should precede project file includes.
-// Use project enums instead of #define for ON and OFF.
-
 #include <xc.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -157,20 +80,19 @@ MC_PIPARMOUT_T piOutputOmega;
 
 volatile uint16_t adcDataBuffer;
 MCAPP_MEASURE_T measureInputs;
+
 /** Definitions */
 /* Open loop angle scaling Constant - This corresponds to 1024(2^10)
    Scaling down motorStartUpData.startupRamp to thetaElectricalOpenLoop   */
 #define STARTUPRAMP_THETA_OPENLOOP_SCALER       10 
-/* Fraction of dc link voltage(expressed as a squared amplitude) to set the limit for current controllers PI Output */
+/* Fraction of dc link voltage(expressed as a squared amplitude) to set 
+ * the limit for current controllers PI Output */
 #define MAX_VOLTAGE_VECTOR                      0.98
 
 void InitControlParameters(void);
 void DoControl( void );
 void CalculateParkAngle(void);
 void ResetParmeters(void);
-void PWMDutyCycleSetDualEdge(MC_DUTYCYCLEOUT_T *,MC_DUTYCYCLEOUT_T *);
-void PWMDutyCycleSet(MC_DUTYCYCLEOUT_T *);
-void pwmDutyCycleLimitCheck(MC_DUTYCYCLEOUT_T *,uint16_t,uint16_t);
 
 // *****************************************************************************
 /* Function:
@@ -825,57 +747,6 @@ void InitControlParameters(void)
     piInputOmega.piState.outMin = -piInputOmega.piState.outMax;
     piInputOmega.piState.integrator = 0;
     piOutputOmega.out = 0;
-}
-
-void PWMDutyCycleSet(MC_DUTYCYCLEOUT_T *pPwmDutycycle)
-{
-    pwmDutyCycleLimitCheck(pPwmDutycycle,(DDEADTIME>>1),(LOOPTIME_TCY - (DDEADTIME>>1)));  
-    INVERTERA_PWM_PDC3 = pPwmDutycycle->dutycycle3;
-    INVERTERA_PWM_PDC2 = pPwmDutycycle->dutycycle2;
-    INVERTERA_PWM_PDC1 = pPwmDutycycle->dutycycle1;
-}
-void PWMDutyCycleSetDualEdge(MC_DUTYCYCLEOUT_T *pPwmDutycycle1,MC_DUTYCYCLEOUT_T *pPwmDutycycle2)
-{
-    pwmDutyCycleLimitCheck(pPwmDutycycle1,(DDEADTIME>>1),(LOOPTIME_TCY - (DDEADTIME>>1)));
-    
-    INVERTERA_PWM_PHASE3 = pPwmDutycycle1->dutycycle3 + (DDEADTIME>>1);
-    INVERTERA_PWM_PHASE2 = pPwmDutycycle1->dutycycle2 + (DDEADTIME>>1);
-    INVERTERA_PWM_PHASE1 = pPwmDutycycle1->dutycycle1 + (DDEADTIME>>1);
-    
-    pwmDutyCycleLimitCheck(pPwmDutycycle2,(DDEADTIME>>1),(LOOPTIME_TCY - (DDEADTIME>>1)));
-    
-    INVERTERA_PWM_PDC3 = pPwmDutycycle2->dutycycle3 - (DDEADTIME>>1);
-    INVERTERA_PWM_PDC2 = pPwmDutycycle2->dutycycle2 - (DDEADTIME>>1);
-    INVERTERA_PWM_PDC1 = pPwmDutycycle2->dutycycle1 - (DDEADTIME>>1);
-}
-void pwmDutyCycleLimitCheck (MC_DUTYCYCLEOUT_T *pPwmDutycycle,uint16_t min,uint16_t max)
-{
-    if(pPwmDutycycle->dutycycle1 < min)
-    {
-        pPwmDutycycle->dutycycle1 = min;
-    }
-    else if(pPwmDutycycle->dutycycle1 > max)
-    {
-        pPwmDutycycle->dutycycle1 = max;
-    }
-    
-    if(pPwmDutycycle->dutycycle2 < min)
-    {
-        pPwmDutycycle->dutycycle2 = min;
-    }
-    else if(pPwmDutycycle->dutycycle2 > max)
-    {
-        pPwmDutycycle->dutycycle2 = max;
-    }
-    
-    if(pPwmDutycycle->dutycycle3 < min)
-    {
-        pPwmDutycycle->dutycycle3 = min;
-    }
-    else if(pPwmDutycycle->dutycycle3 > max)
-    {
-        pPwmDutycycle->dutycycle3 = max;
-    }
 }
 
 void __attribute__((__interrupt__,no_auto_psv)) _PWMInterrupt()

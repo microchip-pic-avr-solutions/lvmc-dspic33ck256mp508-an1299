@@ -39,7 +39,7 @@
 #include <stdbool.h>
 
 #include <xc.h>
-
+#include "motor_control_noinline.h"
 #ifdef __cplusplus  // Provide C++ Compatability
     extern "C" {
 #endif
@@ -86,6 +86,9 @@ extern void BoardService(void);
 extern bool IsPressed_Button1(void);
 extern bool IsPressed_Button2(void);
 extern void InitPeripherals(void);
+extern void PWMDutyCycleSetDualEdge(MC_DUTYCYCLEOUT_T *,MC_DUTYCYCLEOUT_T *);
+extern void PWMDutyCycleSet(MC_DUTYCYCLEOUT_T *);
+extern void pwmDutyCycleLimitCheck(MC_DUTYCYCLEOUT_T *,uint16_t,uint16_t);
 
 #ifdef __cplusplus
 }
