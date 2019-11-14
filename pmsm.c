@@ -385,7 +385,7 @@ void DoControl( void )
         temp_qref_pow_q15 = (int16_t)(__builtin_mulss(piOutputId.out ,
                                                       piOutputId.out) >> 15);
         temp_qref_pow_q15 = Q15(MAX_VOLTAGE_VECTOR) - temp_qref_pow_q15;
-        piInputIq.piState.outMax = Q15SQRT (temp_qref_pow_q15);
+        piInputIq.piState.outMax = _Q15sqrt (temp_qref_pow_q15);
         piInputIq.piState.outMin = - piInputIq.piState.outMax;    
         /* PI control for Q */
         /* Speed reference */
@@ -523,7 +523,7 @@ void DoControl( void )
         temp_qref_pow_q15 = (int16_t)(__builtin_mulss(piOutputId.out ,
                                                       piOutputId.out) >> 15);
         temp_qref_pow_q15 = Q15(MAX_VOLTAGE_VECTOR) - temp_qref_pow_q15;
-        piInputIq.piState.outMax = Q15SQRT (temp_qref_pow_q15);
+        piInputIq.piState.outMax = _Q15sqrt (temp_qref_pow_q15);
         piInputIq.piState.outMin = - piInputIq.piState.outMax;
         /* PI control for Q */
         piInputIq.inMeasure  = idq.q;

@@ -81,7 +81,7 @@ controllers, tuning mode will disable the speed PI controller */
 #undef TORQUE_MODE
 /* FOC with single shunt is enabled */
 /* undef to work with dual Shunt  */    
-#undef SINGLE_SHUNT     
+#define SINGLE_SHUNT     
 
 #define INTERNAL_OPAMP_CONFIG    
 

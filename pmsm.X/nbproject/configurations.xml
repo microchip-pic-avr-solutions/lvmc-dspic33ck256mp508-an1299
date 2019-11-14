@@ -69,7 +69,6 @@
       <itemPath>../estim.c</itemPath>
       <itemPath>../fdweak.c</itemPath>
       <itemPath>../pmsm.c</itemPath>
-      <itemPath>../q15sqrt.s</itemPath>
       <itemPath>../diagnostics_x2cscope.c</itemPath>
       <itemPath>../singleshunt.c</itemPath>
     </logicalFolder>
@@ -96,7 +95,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="dsPIC33CK-MP_DFP" vendor="Microchip" version="1.1.51"/>
+        <pack name="dsPIC33CK-MP_DFP" vendor="Microchip" version="1.2.66"/>
       </packs>
       <compileType>
         <linkerTool>
@@ -199,7 +198,7 @@
         <property key="assembler-symbols" value=""/>
         <property key="expand-macros" value="false"/>
         <property key="extra-include-directories-for-assembler"
-                  value="..\lib;..\;..\lib\motor_control"/>
+                  value="..\lib\motor_control"/>
         <property key="extra-include-directories-for-preprocessor" value=""/>
         <property key="false-conditionals" value="false"/>
         <property key="keep-locals" value="false"/>

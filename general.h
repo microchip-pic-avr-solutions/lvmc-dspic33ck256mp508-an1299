@@ -45,8 +45,6 @@ extern "C" {
 ((Float_Value < 0.0) ? (int16_t)(32768 * (Float_Value) - 0.5) \
 : (int16_t)(32767 * (Float_Value) + 0.5))
 
-int16_t Q15SQRT(int16_t );
-
 #ifdef __cplusplus  // Provide C++ Compatibility
     }
 #endif
