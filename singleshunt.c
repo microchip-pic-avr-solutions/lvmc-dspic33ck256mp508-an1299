@@ -77,8 +77,6 @@ void SingleShunt_InitializeParameters(SINGLE_SHUNT_PARM_T *pSingleShunt)
         /*Trigger  values of Bus Current Samples made equal to zero */
     pSingleShunt->Ibus1 = 0;
     pSingleShunt->Ibus2 = 0;
-    pSingleShunt->Ibus1Buffer = 0;
-    pSingleShunt->Ibus2Buffer = 0;
     pSingleShunt->adcSamplePoint = 0;
 }
 // *****************************************************************************
@@ -108,7 +106,7 @@ uint16_t SingleShunt_CalculateSpaceVectorPhaseShifted(MC_ABC_T *abc,
                                     uint16_t iPwmPeriod,
                                     SINGLE_SHUNT_PARM_T *pSingleShunt)
 { 
-    asm volatile("push  CORCON");
+    uint16_t mcCorconSave = CORCON;
     CORCON = 0x00E2;
     
     MC_DUTYCYCLEOUT_T *pdcout1 = &pSingleShunt->pwmDutycycle1;
@@ -221,13 +219,13 @@ uint16_t SingleShunt_CalculateSpaceVectorPhaseShifted(MC_ABC_T *abc,
         so a valid measurement is done using a single shunt resistor.
         tDelaySample is added as a delay so no erroneous measurement is taken*/
 	
-    pSingleShunt->trigger1 = (MPER + pSingleShunt->tDelaySample);
+    pSingleShunt->trigger1 = (iPwmPeriod + pSingleShunt->tDelaySample);
     pSingleShunt->trigger1 = pSingleShunt->trigger1 - ((pSingleShunt->Ta1 + pSingleShunt->Tb1) >> 1) ;
-    pSingleShunt->trigger2 = (MPER +  pSingleShunt->tDelaySample);
+    pSingleShunt->trigger2 = (iPwmPeriod +  pSingleShunt->tDelaySample);
     pSingleShunt->trigger2 = pSingleShunt->trigger2 - ((pSingleShunt->Tb1 + pSingleShunt->Tc1) >> 1) ;
 	INVERTERA_PWM_TRIGB = singleShuntParam.trigger1;
     INVERTERA_PWM_TRIGC = singleShuntParam.trigger2;
-    asm volatile("pop  CORCON");
+    CORCON = mcCorconSave;
     return(1);
 }
 // *****************************************************************************
@@ -370,11 +368,6 @@ void SingleShunt_PhaseCurrentReconstruction(SINGLE_SHUNT_PARM_T *pSingleShunt)
             pSingleShunt->Ic = pSingleShunt->Ibus1; 
             pSingleShunt->Ib = -pSingleShunt->Ibus2;
             pSingleShunt->Ia = -pSingleShunt->Ic - pSingleShunt->Ib;
-        break;
-        default:
-            pSingleShunt->Ic = 0; 
-            pSingleShunt->Ib = 0;
-            pSingleShunt->Ia = 0;
         break;   
     }  
 }
