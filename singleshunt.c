@@ -33,7 +33,6 @@
  * certify, or support the code.
  *
  *******************************************************************************/
-#include <xc.h>
 #include <libq.h>
 #include "userparms.h"
 #include "singleshunt.h"

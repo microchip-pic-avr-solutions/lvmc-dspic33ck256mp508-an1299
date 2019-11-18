@@ -35,7 +35,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <xc.h> // include processor files - each processor file is guarded.
 #include <clock.h>     
 #include "pwm.h"    
 #include "general.h"
