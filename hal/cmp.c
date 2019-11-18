@@ -257,7 +257,7 @@ void CMP1_ReferenceSet(uint16_t data)
  */
 void CMP1_ModuleEnable(bool state)
 {
-    if(state == true)
+    if (state == true)
     {
         /** Individual DACx Module Enable bit
             1 = Enables DACx module

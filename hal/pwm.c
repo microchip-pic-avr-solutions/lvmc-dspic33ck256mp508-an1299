@@ -262,32 +262,32 @@ void ChargeBootstarpCapacitors(void)
     {
         prevStatusCAHALF = currStatusCAHALF;
         currStatusCAHALF = PG1STATbits.CAHALF;
-        if(prevStatusCAHALF != currStatusCAHALF)
+        if (prevStatusCAHALF != currStatusCAHALF)
         {
-            if(currStatusCAHALF == 0)
+            if (currStatusCAHALF == 0)
             {
                 i--; 
                 k++;
-                if(i == (BOOTSTRAP_CHARGING_COUNTS - 50))
+                if (i == (BOOTSTRAP_CHARGING_COUNTS - 50))
                 {
                     // 0 = PWM generator provides data for PWM1L pin
                     PG1IOCONLbits.OVRENL = 0;
                 }
-                else if(i == (BOOTSTRAP_CHARGING_COUNTS - 150))
+                else if (i == (BOOTSTRAP_CHARGING_COUNTS - 150))
                 {
                     // 0 = PWM generator provides data for PWM2L pin
                     PG2IOCONLbits.OVRENL = 0;  
                 }
-                else if(i == (BOOTSTRAP_CHARGING_COUNTS - 250))
+                else if (i == (BOOTSTRAP_CHARGING_COUNTS - 250))
                 {
                     // 0 = PWM generator provides data for PWM4L pin
                     PG4IOCONLbits.OVRENL = 0;  
                 }
-                if(k > 25)
+                if (k > 25)
                 {
-                    if(PG4IOCONLbits.OVRENL == 0)
+                    if (PG4IOCONLbits.OVRENL == 0)
                     {
-                        if(INVERTERA_PWM_PDC3 > 2)
+                        if (INVERTERA_PWM_PDC3 > 2)
                         {
                             INVERTERA_PWM_PDC3 -= 2;
                         }
@@ -296,9 +296,9 @@ void ChargeBootstarpCapacitors(void)
                            INVERTERA_PWM_PDC3 = 0; 
                         }
                     }
-                    if(PG2IOCONLbits.OVRENL == 0)
+                    if (PG2IOCONLbits.OVRENL == 0)
                     {
-                        if(INVERTERA_PWM_PDC2 > 2)
+                        if (INVERTERA_PWM_PDC2 > 2)
                         {
                             INVERTERA_PWM_PDC2 -= 2;
                         }
@@ -307,9 +307,9 @@ void ChargeBootstarpCapacitors(void)
                             INVERTERA_PWM_PDC2 = 0; 
                         }
                     }
-                    if(PG1IOCONLbits.OVRENL == 0)
+                    if (PG1IOCONLbits.OVRENL == 0)
                     {
-                        if(INVERTERA_PWM_PDC1 > 2)
+                        if (INVERTERA_PWM_PDC1 > 2)
                         {
                             INVERTERA_PWM_PDC1 -= 2;
                         }

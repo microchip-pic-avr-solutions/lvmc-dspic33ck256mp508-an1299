@@ -63,7 +63,7 @@ static void ButtonScan(BUTTON_T * ,bool);
 
 bool IsPressed_Button1(void)
 {
-    if(buttonStartStop.status)
+    if (buttonStartStop.status)
     {
         buttonStartStop.status = false;
         return true;
@@ -76,7 +76,7 @@ bool IsPressed_Button1(void)
 
 bool IsPressed_Button2(void)
 {
-    if(buttonSpeedHalfDouble.status)
+    if (buttonSpeedHalfDouble.status)
     {
         buttonSpeedHalfDouble.status = false;
         return true;
@@ -275,29 +275,29 @@ void PWMDutyCycleSetDualEdge(MC_DUTYCYCLEOUT_T *pPwmDutycycle1,MC_DUTYCYCLEOUT_T
 }
 void pwmDutyCycleLimitCheck (MC_DUTYCYCLEOUT_T *pPwmDutycycle,uint16_t min,uint16_t max)
 {
-    if(pPwmDutycycle->dutycycle1 < min)
+    if (pPwmDutycycle->dutycycle1 < min)
     {
         pPwmDutycycle->dutycycle1 = min;
     }
-    else if(pPwmDutycycle->dutycycle1 > max)
+    else if (pPwmDutycycle->dutycycle1 > max)
     {
         pPwmDutycycle->dutycycle1 = max;
     }
     
-    if(pPwmDutycycle->dutycycle2 < min)
+    if (pPwmDutycycle->dutycycle2 < min)
     {
         pPwmDutycycle->dutycycle2 = min;
     }
-    else if(pPwmDutycycle->dutycycle2 > max)
+    else if (pPwmDutycycle->dutycycle2 > max)
     {
         pPwmDutycycle->dutycycle2 = max;
     }
     
-    if(pPwmDutycycle->dutycycle3 < min)
+    if (pPwmDutycycle->dutycycle3 < min)
     {
         pPwmDutycycle->dutycycle3 = min;
     }
-    else if(pPwmDutycycle->dutycycle3 > max)
+    else if (pPwmDutycycle->dutycycle3 > max)
     {
         pPwmDutycycle->dutycycle3 = max;
     }

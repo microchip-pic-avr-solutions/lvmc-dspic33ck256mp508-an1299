@@ -180,7 +180,7 @@ void InitOscillator(void)
 void EnableREFCLKOutput(uint16_t Divider)
 {
     
-    if(REFOCONLbits.ROACTIVE == 0)
+    if (REFOCONLbits.ROACTIVE == 0)
     {
         REFOCONHbits.RODIV = Divider;
         REFOCONLbits.ROSLP = 1;
