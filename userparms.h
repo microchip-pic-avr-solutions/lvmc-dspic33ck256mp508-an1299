@@ -163,7 +163,7 @@ before the open loop speed ramp up */
 #define Q_CURRENT_REF_OPENLOOP NORM_CURRENT(1.0)
 
 /* Specify Over Current Limit - DC BUS */
-#define Q15_OVER_CURRENT_THRESHOLD NORM_CURRENT(2.5)
+#define Q15_OVER_CURRENT_THRESHOLD NORM_CURRENT(3.0)
 
 /* Maximum motor speed converted into electrical speed */
 #define MAXIMUMSPEED_ELECTR MAXIMUM_SPEED_RPM*NOPOLESPAIRS

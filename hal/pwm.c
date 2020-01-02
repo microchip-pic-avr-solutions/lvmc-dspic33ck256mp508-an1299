@@ -419,7 +419,7 @@ void InitPWMGenerator1 (void)
     PG1IOCONLbits.CLMOD = 0;
     /* Swap PWM Signals to PWM1H and PWM1L Device Pins bit 
        0 = PWM1H/L signals are mapped to their respective pins */
-    PG1IOCONLbits.SWAP = 1;
+    PG1IOCONLbits.SWAP = 0;
     /* User Override Enable for PWM1H Pin bit
        0 = PWM Generator provides data for the PWM1H pin*/
     PG1IOCONLbits.OVRENH = 0;
@@ -754,7 +754,7 @@ void InitPWMGenerator2 (void)
     PG2IOCONLbits.CLMOD = 0;
     /* Swap PWM Signals to PWM2H and PWM2L Device Pins bit 
        0 = PWM2H/L signals are mapped to their respective pins */
-    PG2IOCONLbits.SWAP = 1;
+    PG2IOCONLbits.SWAP = 0;
     /* User Override Enable for PWM2H Pin bit
        0 = PWM Generator provides data for the PWM2H pin*/
     PG2IOCONLbits.OVRENH = 0;
@@ -1079,7 +1079,7 @@ void InitPWMGenerator4 (void)
     PG4IOCONLbits.CLMOD = 0;
     /* Swap PWM Signals to PWM4H and PWM4L Device Pins bit 
        0 = PWM4H/L signals are mapped to their respective pins */
-    PG4IOCONLbits.SWAP = 1;
+    PG4IOCONLbits.SWAP = 0;
     /* User Override Enable for PWM4H Pin bit
        0 = PWM Generator provides data for the PWM4H pin*/
     PG4IOCONLbits.OVRENH = 0;
