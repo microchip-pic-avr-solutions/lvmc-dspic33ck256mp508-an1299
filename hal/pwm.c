@@ -160,7 +160,7 @@ void InitPWMGenerators(void)
     PG1CONLbits.ON = 1;      // Enable PWM module after initializing generators
 
     /* Function call to charge Bootstrap capacitors*/
-//    ChargeBootstarpCapacitors();
+    ChargeBootstarpCapacitors();
 }
 // *****************************************************************************
 /* Function:
