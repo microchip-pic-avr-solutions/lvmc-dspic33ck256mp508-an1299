@@ -1,5 +1,6 @@
-#include "motor_control_mapping.h"
-#include "motor_control_declarations.h"
+//#include "motor_control_mapping.h"
+#include "pmsm.X/library-motor/motor_control_declarations.h"
+
 
 /* 
  * This file is used to pull in portions of motor_control.h
