@@ -7,7 +7,7 @@
       "version":"1.0.0",
       "displayName":"AN1299 dspic33ck256mp508 LVMC",
       "projectName":"lvmc-dspic33ck256mp508-an1299",
-      "shortDescription":"Sensorless Field Oriented Control of a PMSM",
+      "shortDescription":"Sensorless Field Oriented Control of a PMSM with PLL Estimator",
       "ide":{
          "name":"MPLABX",
          "semverRange":">=5.40.0"
