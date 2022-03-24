@@ -42,7 +42,8 @@
 *******************************************************************************/
 
 
-#include "pmsm.X/library-x2cscope/X2CScope.h"
+//#include "pmsm.X/library-x2cscope/X2CScope.h"
+#include "library/library-x2cscope/X2CScope.h"
 #include "uart1.h"
 #include <stdint.h>
 

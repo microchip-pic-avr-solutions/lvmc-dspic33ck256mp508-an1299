@@ -1,5 +1,6 @@
 //#include "motor_control_mapping.h"
-#include "pmsm.X/library-motor/motor_control_declarations.h"
+//#include "pmsm.X/library-motor/motor_control_declarations.h"
+#include "library/library-motor/motor_control_declarations.h"
 
 
 /* 
