@@ -4,7 +4,7 @@
    "content":{
       "metaDataVersion":"1.3.0",
       "name":"com.microchip.mplabx.project.lvmc-dspic33ck256mp508-an1299",
-      "version":"1.0.0",
+      "version":"1.0.1",
       "displayName":"AN1299 dspic33ck256mp508 LVMC",
       "projectName":"lvmc-dspic33ck256mp508-an1299",
       "shortDescription":"Sensorless Field Oriented Control of a PMSM with PLL Estimator",
