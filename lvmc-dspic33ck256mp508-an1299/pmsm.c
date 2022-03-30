@@ -122,8 +122,8 @@ int main ( void )
 {
     InitOscillator();
     SetupGPIOPorts();
-    /* Turn on LED2 to indicate the device is programmed */
-    LED2 = 1;
+    /* Turn on LED1 to indicate the device is programmed */
+    LED1 = 1;
     /* Initialize Peripherals */
     InitPeripherals();
     DiagnosticsInit();
@@ -144,13 +144,14 @@ int main ( void )
             {
                 if  (uGF.bits.RunMotor == 1)
                 {
+                    LED2 = 0;
                     ResetParmeters();
                 }
                 else
                 {
                     EnablePWMOutputsInverterA();
                     uGF.bits.RunMotor = 1;
-                    LED1 = 0;
+                    LED2 = 1;
                 }
 
             }
@@ -753,6 +754,6 @@ void __attribute__((__interrupt__,no_auto_psv)) _PWMInterrupt()
 {
     ResetParmeters();
     ClearPWMPCIFaultInverterA();
-    LED1 = 1; 
+    LED2 = 0; 
     ClearPWMIF(); 
 }

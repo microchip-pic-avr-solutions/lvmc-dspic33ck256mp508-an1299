@@ -1,6 +1,6 @@
 ![image](images/microchip.jpg) 
 
-# LVMC DSPIC33CK256MP508 AN1299
+# LVMC dsPIC33CK256MP508 AN1299
 
 ## INTRODUCTION
 <p style='text-align: justify;'>
@@ -30,7 +30,6 @@ To clone or download this application from Github, go to the [main page of this 
 - dsPIC33CK Low Voltage Motor Control Board, Part-No. [DM330031](https://www.microchip.com/developmenttools/ProductDetails/PartNO/DM330031)
 - 24V Power Supply, Part-No. [AC002013](https://www.microchipdirect.com/dev-tools/AC002013)
 - 24V 3-Phase Brushless DC Motor, Part-No. [AC300020](https://www.microchip.com/en-us/development-tool/AC300020)
-- Microchip Programmer tool - MPLAB PICkit 4 In-Circuit Debugger, Part-No. [PG164140](https://www.microchip.com/en-us/development-tool/PG164140)
   <br />
 > **_NOTE:_**
 > All items listed under the section Hardware Tools Required for the Demonstration are available at [microchip DIRECT](https://www.microchipdirect.com/)
@@ -39,12 +38,12 @@ To clone or download this application from Github, go to the [main page of this 
 <p style='text-align: justify;'>This section describes hardware setup required for the demonstration. Motor phase current feed-backs needed by the firmware are amplified by the operational amplifiers.</p>
 <p style='text-align: justify;'>
 If the amplifiers that are internal to the dsPIC33CK256MP508 are used, then that configuration is called internal amplifier configuration. If external amplifiers are used, then that configuration is called as external amplifier configuration.</p>
+<p style='text-align: justify;'>
+1. Perform the following modifications based upon amplifier configuration. By default, Board is configured for Internal OP-AMP Configuration.</p>
 
-1. <p style='text-align: justify;'>Perform the following modifications based upon amplifier configuration. By default, Board is configured for Internal OP-AMP Configuration.</p>
-
-    - For running the motor in internal op amp configuration make sure that resistors R125, R133, R141 are populated and R121, R129, R137 are unpopulated. Also ensure internal amplifiers are configured and enabled.
-    - For running the motor in external amp configuration make sure that resistors R121, 
-      R129, R137 are populated and R125, R133, R141 are unpopulated. Also disable internal amplifiers in the firmware.
+- For running the motor in internal op amp configuration make sure that resistors R125, R133, R141 are populated and R121, R129, R137 are unpopulated. Also ensure internal amplifiers are configured and enabled.
+- For running the motor in external amp configuration make sure that resistors R121, 
+  R129, R137 are populated and R125, R133, R141 are unpopulated. Also disable internal amplifiers in the firmware.
 
 <p style='text-align: justify;'>
 2. Connect the three phase wires from the motor to PHA, PHB, and PHC terminals of connector J14(there is no specific order), provided on the dsPIC33CK Low Voltage Motor Control Board.</p> 
@@ -70,7 +69,7 @@ If the amplifiers that are internal to the dsPIC33CK256MP508 are used, then that
  <p align = "center"><font size="2"> Figure 3  LVMC PKOB4
 </p> 
 <p style='text-align: justify;'>
-5.	Alternatively, connect the Microchip programmer/debugger MPLAB PICkit 4 In-Circuit De-bugger to the Connector J10 of the dsPIC33CK Low Voltage Motor Control Board as shown below and to the Host PC used for programming the device. Ensure that PICkit 4 is connected in correct orientation.</p>
+5.	Alternatively, the device can also be programmed using the programmer/debugger (MPLAB® PICkit™ 4 In-Circuit Debugger - PG164140) by interfacing it through connector J10 of the dsPIC33CK Low Voltage Motor Control Board as shown below. Ensure that the programmer is oriented correctly before proceeding.</p>
 
 <p align="center">
   <img  src="images/lvmcprogrammingconnector.png"></p>
@@ -81,16 +80,16 @@ If the amplifiers that are internal to the dsPIC33CK256MP508 are used, then that
 ## SOFTWARE SETUP AND RUN
 ### Setup: MPLAB X IDE and MPLAB XC16 Compiler
 <p style='text-align: justify;'>
-Install MPLAB X IDE and MPLAB XC16 Compiler versions that support the device dsPIC33CK256MP508 and PKOBv4. The version of the MPLAB X IDE, MPLAB XC16 Compiler and X2C-Scope plug-in used for testing the firmware are mentioned in the section Software Tools Used for Testing the firmware. To get help on </p>
+Install MPLAB X IDE and MPLAB XC16 Compiler versions that support the device dsPIC33CK256MP508 and PKoBv4. The version of the MPLAB X IDE, MPLAB XC16 Compiler and X2C-Scope plug-in used for testing the firmware are mentioned in the section Software Tools Used for Testing the firmware. To get help on </p>
 
 - MPLAB X IDE installation, refer [link](https://microchipdeveloper.com/mplabx:installation)
 - MPLAB XC16 Compiler installation steps, refer [link](https://microchipdeveloper.com/xc16:installation)
 
 <p style='text-align: justify;'>If MPLAB IDE v8 or earlier is already installed on your computer, then run the MPLAB driver switcher (It is installed when MPLAB®X IDE is installed) to switch from MPLAB IDE v8 drivers to MPLAB X IDE drivers. If you have Windows 7 or 8, you must run MPLAB driver switcher in ‘Administrator Mode’. To run the Device Driver Switcher GUI application as administrator, right click on the executable (or desktop icon) and select ‘Run as Administrator’. For additional details refer MPLAB X IDE help topic “Before You Begin: Install the USB Device Drivers (For Hardware Tools): USB Driver Installation for Windows Operating Systems”. </p>
 
-### Setup: X2C - SCOPE
+### Setup: X2C - Scope
 <p style='text-align: justify;'>
-X2C - SCOPE is a MPLAB X IDE plugin that allows a developer to interact with an application while the application program is running. X2C-Scope enables you to read, write, and plot global variables (for motor control) in real time. It communicates with the target using the UART. To use X2C, the plugin must be installed:</p>
+X2C - Scope is a MPLAB X IDE plugin that allows a developer to interact with an application while the application program is running. X2C-Scope enables you to read, write, and plot global variables (for motor control) in real time. It communicates with the target using the UART. To use X2C, the plugin must be installed:</p>
 
 - In MPLAB X IDE, select Tools>Plugins and click on the Available Plugins tab.
 - Select X2C - SCOPE plug-in by checking its check box, and then click Install.
@@ -110,7 +109,7 @@ For more information, see the dsPIC33CK256MP508 Family datasheet (DS70005349).</
 <p style='text-align: justify;'>
 The Motor Control Demo application uses push button to start or stop the motor and poten-tiometer to vary speed of the motor.</p>
 <p style='text-align: justify;'>
-This Motor Control Demo Application configures and uses peripherals like PWM, ADC, UART etc. required for implementing Sensor-less Field Oriented Control (FOC) of Permanent Magnet Synchronous Motor (PMSM) based on the motor control application AN1299 & AN1078.</p>
+This Motor Control Demo Application configures and uses peripherals like PWM, ADC, UART etc. required for implementing Sensor-less Field Oriented Control (FOC) of Permanent Magnet Synchronous Motor (PMSM) based on the motor control application AN1299 & AN1292.</p>
 <p style='text-align: justify;'>
 For more details refer Microchip Application note AN1299 “Single-Shunt Three-Phase Current Reconstruction Algorithm for Sensorless FOC of a PMSM” and AN1292 “Sensorless Field Oriented Control(FOC) for a Permanent Magnet Synchronous Motor(PMSM) using a PLL Es-timator and Field Weakening(FW)” available at Microchip web site. </p>
 
@@ -184,9 +183,9 @@ Follow below instructions step by step to setup and run the motor control demo a
  <p align = "center"><font size="2"> Figure 13  Device Programming
 </p>
   
-8. <p style='text-align: justify;'>		If the device is successfully programmed, LD10 (‘LED2) will be turned ON, indicating that the dsPIC® DSC is enabled.</p> 
+8. <p style='text-align: justify;'>		If the device is successfully programmed, LD10 (LED1) will be turned ON, indicating that the dsPIC® DSC is enabled.</p> 
 
-9. <p style='text-align: justify;'>		Run or Stop the motor by pressing the push button SW1. The function of the pushbutton SW1 (Run/Stop of the motor) is indicated by turning ON or OFF the LED1 (LD11).</p>
+9. <p style='text-align: justify;'>		Run or Stop the motor by pressing the push button SW1. The function of the pushbutton SW1 (Run/Stop of the motor) is indicated by turning ON or OFF the LD11 (LED2).</p>
 
   <p align="center">
   <img  src="images/pushbuttons.png"></p>
